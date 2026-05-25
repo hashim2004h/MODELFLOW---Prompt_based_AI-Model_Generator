@@ -1,24 +1,54 @@
-﻿# MODELFLOW — Prompt-Based AI Model Generator
+# MODELFLOW — Prompt-Based AI Model Generator
 
-As part of my AI and software development learning journey, I developed MODELFLOW, a prompt-based platform designed to simplify machine learning model creation and deployment for beginners and non-technical users.
+A prompt-based AI platform designed to simplify machine learning workflow creation through an interactive web interface. The project automates model selection, training, testing, and export processes, making AI development more accessible for users with minimal coding experience.
 
-The project focuses on automating AI workflows through natural language prompts, reducing the complexity involved in traditional machine learning development. :contentReference[oaicite:0]{index=0}
+---
 
-🔹 Prompt-based AI model generation  
-🔹 Automated model recommendation system  
-🔹 Real-time model training and testing  
-🔹 Support for image, audio, and pose-based AI projects  
-🔹 Multi-format model export (H5, ONNX, TFLite, PyTorch)  
-🔹 Interactive browser-based workflow automation  
+## Key Features
 
-Key highlights from the project:
+- Prompt-based AI workflow generation  
+- Automatic model recommendation  
+- Real-time training and testing  
+- Support for image, audio, and pose-based AI tasks  
+- Multi-format model export support  
 
-• Simplified end-to-end machine learning workflow  
-• Reduced manual coding effort for AI development  
-• Real-time dataset collection and model testing  
-• Supports deployment-ready model export formats  
-• Integrated OCR, object detection, and speech-to-text modules  
+---
 
-Tech Stack: Python, Flask, TensorFlow, Keras, OpenCV, HTML, CSS, JavaScript, OpenRouter API  
+## Platform Capabilities
 
-Developed with a strong focus on workflow automation, accessibility, real-time AI interaction, and simplifying complex machine learning processes through an interactive web-based platform.
+- Simplified machine learning workflow  
+- Interactive browser-based interface  
+- Real-time dataset testing  
+- Automated preprocessing and model handling  
+- Deployment-ready export formats  
+
+---
+
+## Technologies Used
+
+- Python  
+- Flask  
+- TensorFlow  
+- OpenCV  
+- HTML, CSS, JavaScript  
+
+---
+
+## Project Structure
+
+- `app/` → Main web application  
+- `configs/` → Configuration files  
+- `deployment/` → Deployment-related files  
+- `src/` → Core AI and processing modules  
+- `tests/` → Testing scripts  
+- `requirements.txt` → Project dependencies  
+
+---
+
+## Supported Functions
+
+- AI model generation  
+- Dataset preprocessing  
+- Real-time testing  
+- Model training  
+- Multi-format export  
