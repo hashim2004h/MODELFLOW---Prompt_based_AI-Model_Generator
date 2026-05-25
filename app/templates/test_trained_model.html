@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Your Model - AIForge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #00d97e;
+            --primary-rgb: 0, 217, 126;
+            --accent-cyan: #00ffa3;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --light-text: #e8eaed;
+            --secondary-text: #9aa0a6;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --card-highlight: rgba(255, 255, 255, 0.02);
+            --btn-hover: rgba(255, 255, 255, 0.03);
+            --preview-bg: rgba(0, 0, 0, 0.3);
+            --progress-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --primary-green: #0066cc;
+            --primary-rgb: 0, 102, 204;
+            --accent-cyan: #00a2ff;
+            --dark-bg: #f5f7fa;
+            --darker-bg: #ffffff;
+            --card-bg: #ffffff;
+            --light-text: #1a1a1a;
+            --secondary-text: #5f6368;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --card-highlight: rgba(0, 0, 0, 0.02);
+            --btn-hover: rgba(0, 0, 0, 0.05);
+            --preview-bg: rgba(0, 0, 0, 0.05);
+            --progress-bg: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--light-text);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(var(--primary-rgb), 0.03) 0%, transparent 55%),
+                radial-gradient(circle at 85% 30%, rgba(0, 179, 255, 0.03) 0%, transparent 55%);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .back-btn {
+            width: 45px;
+            height: 45px;
+            background: var(--btn-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--light-text);
+        }
+
+        .back-btn:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            border-color: var(--primary-green);
+            transform: scale(1.1);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+        }
+
+        .test-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .test-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .test-card h3 {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary-green);
+            background: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .upload-zone i {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        .btn-upload {
+            padding: 0.8rem 2rem;
+            background: var(--primary-green);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-upload:hover {
+            transform: scale(1.05);
+        }
+
+        .preview-area {
+            min-height: 350px;
+            background: var(--preview-bg);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-area img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: var(--secondary-text);
+        }
+
+        .placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .results-box {
+            background: rgba(var(--primary-rgb), 0.05);
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .results-box.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--card-highlight);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .result-confidence {
+            font-size: 1.3rem;
+            color: var(--primary-green);
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--progress-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-cyan));
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(var(--primary-rgb), 0.1);
+            border-top-color: var(--primary-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .test-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .theme-toggle-btn {
+            background: var(--btn-hover);
+            color: var(--light-text);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+        
+        [data-theme="light"] .theme-toggle-btn {
+            background: #ffffff;
+            border-color: #d1d5db;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <div class="header">
+            <div class="header-left">
+                <a href="/result" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1>Test Your Trained Model</h1>
+                    <p style="color: var(--secondary-text);">Upload new images to test your model's predictions</p>
+                </div>
+            </div>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn">
+                <i class="fas fa-sun"></i> <span>Light Mode</span>
+            </button>
+        </div>
+
+        <div class="test-section">
+            <!-- Upload Section -->
+            <div class="test-card">
+                {% if model_type == 'audio' %}
+                <h3>
+                    <i class="fas fa-file-audio"></i>
+                    Upload Audio Test
+                </h3>
+
+                <div class="upload-zone" onclick="document.getElementById('testFile').click()" id="uploadZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload or drag and drop audio file</p>
+                    <button class="btn-upload">Choose File</button>
+                    <input type="file" id="testFile" accept="audio/*" hidden onchange="handleTest(event)">
+                </div>
+
+                <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                    <h4><i class="fas fa-microphone"></i> Or Record Live Audio:</h4>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button id="recordBtn" class="btn-upload" style="flex: 1; margin-top: 0; background: var(--primary-green); color: var(--dark-bg);" onclick="toggleRecording()">
+                            <i class="fas fa-circle"></i> Start Recording
+                        </button>
+                    </div>
+                    <p id="recordStatus" style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--secondary-text);"></p>
+                </div>
+                {% else %}
+                <h3>
+                    <i class="fas fa-upload"></i>
+                    Upload Test Image
+                </h3>
+
+                <div class="upload-zone" onclick="document.getElementById('testFile').click()" id="uploadZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload or drag and drop image</p>
+                    <button class="btn-upload">Choose File</button>
+                    <input type="file" id="testFile" accept="image/*,audio/*" hidden onchange="handleTest(event)">
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <h4>Or enter text for Text Classification:</h4>
+                    <textarea id="testTextInput" rows="4"
+                        style="width: 100%; margin-top: 1rem; padding: 1rem; background: var(--card-bg); color: var(--light-text); border: 1px solid var(--border-color); border-radius: 8px;"
+                        placeholder="Type text here to test sentiment or spam..."></textarea>
+                    <button class="btn-upload" onclick="handleTextTest()" style="width: 100%;">Analyze Text</button>
+                </div>
+                {% endif %}
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing input...</p>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="test-card">
+                <h3>
+                    <i class="fas fa-chart-bar"></i>
+                    Prediction Results
+                </h3>
+
+                <div class="preview-area" id="previewArea">
+                    <div class="placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>No image or text tested yet</p>
+                    </div>
+                </div>
+
+                <div class="results-box" id="resultsBox">
+                    <h4 style="margin-bottom: 1rem;">Predictions</h4>
+                    <p id="predictedTextSnippet"
+                        style="margin-bottom: 1rem; font-style: italic; color: var(--secondary-text); display: none;">
+                    </p>
+                    <div id="predictionsList">
+                        <!-- Predictions appear here -->
+                    </div>
+
+                    <!-- Rating Section -->
+                    <div id="ratingSection" style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; display: none;">
+                        <h4 style="margin-bottom: 1rem; text-align: center;">How did the model perform?</h4>
+                        <div style="display: flex; gap: 1rem; justify-content: center;">
+                            <button class="btn-upload" onclick="rateModel('good')" style="margin-top: 0; background: var(--primary-green); color: #000; flex: 1;">
+                                <i class="fas fa-thumbs-up"></i> Good (Save)
+                            </button>
+                            <button class="btn-upload" onclick="rateModel('bad')" style="margin-top: 0; background: transparent; border: 1px solid var(--border-color); color: var(--light-text); flex: 1;">
+                                <i class="fas fa-thumbs-down"></i> Bad (Discard)
+                            </button>
+                        </div>
+                        <p id="ratingStatus" style="text-align: center; margin-top: 1rem; font-size: 0.95rem;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeToggleBtn');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+
+            if (html.getAttribute('data-theme') === 'light') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fas fa-sun';
+                span.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+                icon.className = 'fas fa-moon';
+                span.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Initialize theme
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                const btn = document.getElementById('themeToggleBtn');
+                if (btn) {
+                    btn.querySelector('i').className = 'fas fa-moon';
+                    btn.querySelector('span').textContent = 'Dark Mode';
+                }
+            }
+        });
+
+        async function handleTest(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                if (file.type.startsWith('audio/')) {
+                    document.getElementById('previewArea').innerHTML = `
+                        <div style="padding: 2rem; width: 100%; display: flex; flex-direction: column; align-items: center;">
+                            <i class="fas fa-music" style="font-size: 3rem; color: var(--accent-cyan); margin-bottom: 1rem;"></i>
+                            <p>${file.name}</p>
+                            <audio controls src="${e.target.result}" style="margin-top: 1rem; width: 100%; max-width: 300px;"></audio>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('previewArea').innerHTML =
+                        `<img src="${e.target.result}" alt="Test Image">`;
+                }
+            };
+            reader.readAsDataURL(file);
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultsBox').classList.remove('show');
+
+            // Test with model
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/predict-trained-model', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading').classList.remove('show');
+
+                if (data.success) {
+                    if (data.is_detection && data.image_base64) {
+                        document.getElementById('previewArea').innerHTML = `<img src="data:image/jpeg;base64,${data.image_base64}" alt="Detection Result" />`;
+                    }
+                    displayPredictions(data.predictions);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                document.getElementById('loading').classList.remove('show');
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function handleTextTest() {
+            const text = document.getElementById('testTextInput').value.trim();
+            if (!text) return;
+
+            document.getElementById('previewArea').innerHTML = `
+                <div style="padding: 2rem; width: 100%; height: 100%; display: flex; align-items: flex-start; justify-content: flex-start;">
+                    <p style="font-size: 1.1rem;">${text}</p>
+                </div>
+            `;
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultsBox').classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('text_input', text);
+            // Include dummy file to bypass 'file' not in request.files check if backend needs it, but we modified backend so 'file' check is only if not 'csv_file' or 'text_input'. Wait, let's fix backend if needed.
+            // Actually, we can append an empty blob just in case.
+            formData.append('file', new Blob([''], { type: 'text/plain' }));
+
+            try {
+                const response = await fetch('/api/predict-trained-model', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading').classList.remove('show');
+
+                if (data.success) {
+                    displayPredictions(data.predictions, data.predicted_text);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                document.getElementById('loading').classList.remove('show');
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function displayPredictions(predictions, predictedText = '') {
+            const snippet = document.getElementById('predictedTextSnippet');
+            if (predictedText) {
+                snippet.textContent = '"' + predictedText + '"';
+                snippet.style.display = 'block';
+            } else {
+                snippet.style.display = 'none';
+            }
+
+            const list = document.getElementById('predictionsList');
+            if (predictions.length === 0) {
+                list.innerHTML = `<div class="placeholder"><p>No objects detected</p></div>`;
+            } else {
+                list.innerHTML = predictions.map(pred => `
+                    <div class="result-item">
+                        <div style="flex: 1;">
+                            <div class="result-label">${pred.class}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${pred.confidence * 100}%"></div>
+                            </div>
+                        </div>
+                        <div class="result-confidence">${(pred.confidence * 100).toFixed(1)}%</div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('resultsBox').classList.add('show');
+            document.getElementById('ratingSection').style.display = 'block';
+            document.getElementById('ratingStatus').textContent = '';
+        }
+
+        async function rateModel(rating) {
+            const statusEl = document.getElementById('ratingStatus');
+            statusEl.textContent = 'Saving response...';
+            statusEl.style.color = 'var(--secondary-text)';
+            
+            try {
+                const response = await fetch('/api/rate-model', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ rating })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    statusEl.textContent = data.message;
+                    if (rating === 'good') {
+                        statusEl.style.color = 'var(--primary-green)';
+                    } else {
+                        statusEl.style.color = '#e74c3c';
+                    }
+                } else {
+                    statusEl.textContent = 'Error: ' + data.error;
+                    statusEl.style.color = '#e74c3c';
+                }
+            } catch (err) {
+                statusEl.textContent = 'Error: ' + err.message;
+                statusEl.style.color = '#e74c3c';
+            }
+        }
+
+        function audioBufferToWav(buffer) {
+            let numOfChan = buffer.numberOfChannels,
+                length = buffer.length * numOfChan * 2 + 44,
+                bufferArr = new ArrayBuffer(length),
+                view = new DataView(bufferArr),
+                channels = [], i, sample,
+                offset = 0, pos = 0;
+
+            function set16(data) { view.setUint16(offset, data, true); offset += 2; }
+            function set32(data) { view.setUint32(offset, data, true); offset += 4; }
+
+            set32(0x46464952); set32(length - 8); set32(0x45564157); set32(0x20746d66);
+            set32(16); set16(1); set16(numOfChan); set32(buffer.sampleRate);
+            set32(buffer.sampleRate * 2 * numOfChan); set16(numOfChan * 2); set16(16);
+            set32(0x61746164); set32(length - pos - 4);
+
+            for (i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+            while (pos < buffer.length) {
+                for (i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][pos]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    set16(sample);
+                }
+                pos++;
+            }
+            return new Blob([bufferArr], { type: "audio/wav" });
+        }
+
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            const status = document.getElementById('recordStatus');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        btn.innerHTML = 'Processing...';
+                        btn.disabled = true;
+                        status.textContent = 'Formatting audio internally...';
+
+                        try {
+                            const rawBlob = new Blob(audioChunks, { type: 'audio/webm' }); 
+                            const arrayBuffer = await rawBlob.arrayBuffer();
+                            const actx = new (window.AudioContext || window.webkitAudioContext)();
+                            const audioBuffer = await actx.decodeAudioData(arrayBuffer);
+                            const wavBlob = audioBufferToWav(audioBuffer);
+
+                            const file = new File([wavBlob], "recording.wav", { type: "audio/wav" });
+                            handleTest({ target: { files: [file] } });
+                        } catch (err) {
+                            alert('Error formatting audio: ' + err.message);
+                        } finally {
+                            stream.getTracks().forEach(track => track.stop());
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-circle"></i> Start Recording';
+                            btn.style.background = 'var(--primary-green)'; 
+                            btn.style.color = 'var(--dark-bg)';
+                            status.textContent = '';
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.innerHTML = '<i class="fas fa-stop-circle"></i> Stop Recording';
+                    btn.style.background = '#e74c3c'; // Red when recording active
+                    btn.style.color = 'white';
+                    status.textContent = 'Recording in progress... (click stop to test)';
+                    status.style.color = 'var(--primary-green)';
+                } catch (err) {
+                    alert('Microphone access denied or not available.');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                status.textContent = 'Stopping recorder...';
+                status.style.color = 'var(--secondary-text)';
+            }
+        }
+    </script>
+</body>
+
+</html>

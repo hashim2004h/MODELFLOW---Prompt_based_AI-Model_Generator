@@ -1,0 +1,62 @@
+﻿# Web Framework
+flask==3.0.0
+flask-cors==4.0.0
+werkzeug==3.0.1
+
+# Alternative: Streamlit
+streamlit==1.28.0
+
+# Deep Learning Frameworks
+
+tensorflow-hub
+torch
+torchvision
+torchaudio
+
+# AutoML
+autokeras==1.1.0
+keras-tuner==1.4.6
+tpot==0.12.0
+
+# Model Conversion
+onnx
+onnxruntime
+tf2onnx
+
+# Computer Vision
+opencv-python
+pillow
+
+# NLP
+transformers
+tokenizers
+
+# OCR
+easyocr>=1.7.0
+
+# Data Processing
+numpy
+pandas
+scikit-learn
+
+# Visualization
+matplotlib
+seaborn
+
+# LLM Integration
+openai
+
+# Utilities
+python-dotenv
+pyyaml
+tqdm
+requests
+
+# Testing
+pytest
+pytest-cov
+
+# Logging
+loguru
+
+duckduckgo-search>=6.0.0

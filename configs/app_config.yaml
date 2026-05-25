@@ -1,0 +1,46 @@
+﻿# Application Configuration
+# Flask/Streamlit app settings
+
+app:
+  name: "MODELFLOW"
+  version: "0.1.0"
+  debug: true
+  host: "0.0.0.0"
+  port: 5000
+  secret_key: "change-this-in-production"
+  
+api:
+  rate_limit: "100 per hour"
+  max_content_length: 16777216  # 16MB in bytes
+  allowed_extensions:
+    image: [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
+    text: [".txt", ".csv", ".json"]
+    csv: [".csv", ".xlsx"]
+  
+model_serving:
+  max_cached_models: 5
+  inference_timeout: 30  # seconds
+  batch_prediction_limit: 1000
+  
+storage:
+  upload_folder: "data/uploaded"
+  model_folder: "models_storage"
+  export_folder: "models_storage/exported"
+  logs_folder: "logs"
+  
+security:
+  cors_enabled: true
+  cors_origins: ["*"]
+  https_only: false
+  
+ui:
+  theme: "light"  # light, dark
+  language: "en"
+  items_per_page: 20
+  
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_logging: true
+  max_file_size: 10485760  # 10MB
+  backup_count: 5

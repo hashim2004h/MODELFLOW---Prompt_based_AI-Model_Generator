@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIForge - Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #00d97e;
+            --primary-rgb: 0, 217, 126;
+            --accent-cyan: #00ffa3;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --light-text: #e8eaed;
+            --secondary-text: #9aa0a6;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --pill-bg: rgba(255, 255, 255, 0.02);
+        }
+
+        [data-theme="light"] {
+            --primary-green: #0066cc;
+            --primary-rgb: 0, 102, 204;
+            --accent-cyan: #00a2ff;
+            --dark-bg: #f5f7fa;
+            --darker-bg: #ffffff;
+            --card-bg: #ffffff;
+            --light-text: #1a1a1a;
+            --secondary-text: #5f6368;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --pill-bg: rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--light-text);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(var(--primary-rgb), 0.03) 0%, transparent 55%),
+                radial-gradient(circle at 85% 30%, rgba(0, 179, 255, 0.03) 0%, transparent 55%);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Floating Nav - Vertically Centered */
+        .floating-nav {
+            position: fixed;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 1000;
+        }
+
+        .nav-icon {
+            width: 46px;
+            height: 46px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-text);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            border: none;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            background: rgba(var(--primary-rgb), 0.15);
+            color: var(--primary-green);
+            transform: scale(1.2);
+            box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.3);
+        }
+
+        .nav-icon i {
+            font-size: 1.15rem;
+        }
+
+        /* Tooltip */
+        .nav-icon::after {
+            content: attr(data-name);
+            position: absolute;
+            left: 60px;
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-icon:hover::after {
+            opacity: 1;
+            left: 55px;
+        }
+
+        /* Main Container */
+        .chat-container {
+            max-width: 100%;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 150px;
+            /* Space for fixed input */
+        }
+
+        /* Welcome State */
+        .welcome-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .welcome-state.hidden {
+            display: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-big {
+            font-size: 4.5rem;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .welcome-title {
+            font-size: 3.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--light-text), var(--primary-green));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.3rem;
+            color: var(--secondary-text);
+            margin-bottom: 3rem;
+        }
+
+        /* Suggestion Pills */
+        .suggestion-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            max-width: 750px;
+            margin-bottom: 2rem;
+        }
+
+        .pill {
+            padding: 0.9rem 1.6rem;
+            background: var(--pill-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 0.95rem;
+        }
+
+        .pill:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            border-color: var(--primary-green);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.2);
+        }
+
+        /* Messages Area */
+        .messages-area {
+            flex: 1;
+            padding: 2rem 2rem 2rem;
+            display: none;
+            overflow-y: auto;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .messages-area.active {
+            display: block;
+        }
+
+        .message {
+            margin-bottom: 2rem;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user .bubble {
+            background: rgba(var(--primary-rgb), 0.15);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            border-radius: 18px;
+            padding: 1.1rem 1.4rem;
+            max-width: 85%;
+            margin-left: auto;
+            font-size: 1.05rem;
+        }
+
+        .message.assistant .content {
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            margin-bottom: 2rem;
+        }
+
+        .typing-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 1.2rem 1.5rem;
+            display: inline-block;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary-text);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Task Analysis Banner */
+        .analysis-banner {
+            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(0, 179, 255, 0.05));
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .analysis-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(var(--primary-rgb), 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .analysis-details {
+            flex: 1;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .analysis-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .analysis-detail-label {
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            margin-bottom: 0.3rem;
+        }
+
+        .analysis-detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        /* Square Model Cards */
+        .model-section {
+            margin: 2rem 0;
+        }
+
+        .section-header {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .model-card {
+            background: var(--pill-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.8rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-cyan));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .model-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .model-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(var(--primary-rgb), 0.5);
+            box-shadow: 0 20px 50px rgba(var(--primary-rgb), 0.3);
+            background: rgba(var(--primary-rgb), 0.03);
+        }
+
+        .model-card-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(var(--primary-rgb), 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .model-card:hover .model-card-icon {
+            transform: scale(1.1) rotate(5deg);
+            background: rgba(var(--primary-rgb), 0.2);
+        }
+
+        .model-card-icon i {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+        }
+
+        .model-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .model-card p {
+            font-size: 0.9rem;
+            color: var(--secondary-text);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .model-specs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .spec-badge {
+            padding: 0.4rem 0.8rem;
+            background: rgba(var(--primary-rgb), 0.08);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--primary-green);
+        }
+
+        .btn-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px solid var(--primary-green);
+            border-radius: 8px;
+            color: var(--primary-green);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-select:hover {
+            background: var(--primary-green);
+            color: #000;
+            transform: scale(1.02);
+        }
+
+        /* Custom Model Option */
+        .custom-model-option {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .btn-custom {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 2px dashed rgba(var(--primary-rgb), 0.4);
+            border-radius: 50px;
+            color: var(--primary-green);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-custom:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            border-style: solid;
+            transform: scale(1.05);
+        }
+
+        /* Input Area - Always at Bottom */
+        .input-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark-bg);
+            padding: 1.5rem 2rem 2rem;
+            border-top: 1px solid var(--border-color);
+            z-index: 100;
+        }
+
+        .input-box {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 0.7rem 1.2rem;
+            transition: all 0.4s;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .input-box:focus-within {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15), 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.9rem 1rem;
+            color: var(--light-text);
+            font-size: 1.05rem;
+            font-family: inherit;
+            resize: none;
+            max-height: 150px;
+        }
+
+        textarea:focus {
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: var(--secondary-text);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--primary-green);
+            border: none;
+            border-radius: 50%;
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.2) rotate(15deg);
+            box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.5);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .floating-nav {
+                left: 0.8rem;
+            }
+
+            .welcome-title {
+                font-size: 2.8rem;
+            }
+
+            .analysis-details {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .model-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Floating Navigation -->
+    <div class="floating-nav">
+        <button class="nav-icon" data-name="New Chat" onclick="location.reload()">
+            <i class="fas fa-plus"></i>
+        </button>
+        <button class="nav-icon" data-name="History" onclick="alert('History coming soon!')">
+            <i class="fas fa-history"></i>
+        </button>
+        <a href="{{ url_for('main.landing_page') }}" class="nav-icon" data-name="Home">
+            <i class="fas fa-home"></i>
+        </a>
+        <button class="nav-icon" data-name="Settings" onclick="alert('Settings coming soon!')">
+            <i class="fas fa-cog"></i>
+        </button>
+        <button class="nav-icon" data-name="Toggle Theme" onclick="toggleTheme()" id="themeToggleBtn">
+            <i class="fas fa-sun"></i>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="chat-container">
+        <!-- Welcome State -->
+        <div class="welcome-state" id="welcomeState">
+            <div class="logo-big">🧠</div>
+            <h1 class="welcome-title">Hello, Builder!</h1>
+            <p class="welcome-subtitle">What AI model would you like to create today?</p>
+
+            <div class="suggestion-pills">
+                <div class="pill" onclick="fillPrompt('Classify images of different dog breeds')">
+                    🐕 Dog Breed Classifier
+                </div>
+                <div class="pill" onclick="fillPrompt('Detect faces and emotions in photos')">
+                    😊 Face & Emotion Detector
+                </div>
+                <div class="pill" onclick="fillPrompt('Analyze sentiment of product reviews')">
+                    💬 Sentiment Analyzer
+                </div>
+                <div class="pill" onclick="fillPrompt('Predict house prices from features')">
+                    🏠 Price Predictor
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="messages-area" id="messagesArea">
+            <!-- Messages appear here -->
+        </div>
+    </div>
+
+    <!-- Input Area - Fixed at Bottom -->
+    <div class="input-wrapper">
+        <div class="input-box">
+            <textarea id="promptInput" placeholder="Describe your AI model..." rows="1"></textarea>
+            <button class="send-btn" id="sendBtn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeToggleBtn');
+            const icon = btn.querySelector('i');
+
+            if (html.getAttribute('data-theme') === 'light') {
+                html.removeAttribute('data-theme');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                const btn = document.getElementById('themeToggleBtn');
+                if (btn) {
+                    btn.querySelector('i').className = 'fas fa-moon';
+                }
+            }
+        });
+
+        let isFirstMessage = true;
+        let currentLoadedTaskType = 'image_classification';
+        let currentPrompt = '';
+
+        function fillPrompt(text) {
+            document.getElementById('promptInput').value = text;
+            document.getElementById('promptInput').focus();
+        }
+
+        function autoGrow() {
+            const textarea = document.getElementById('promptInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+        }
+
+        document.getElementById('promptInput').addEventListener('input', autoGrow);
+
+        document.getElementById('promptInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+        async function sendMessage() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            if (!prompt) return;
+
+            if (isFirstMessage) {
+                document.getElementById('welcomeState').classList.add('hidden');
+                document.getElementById('messagesArea').classList.add('active');
+                isFirstMessage = false;
+            }
+
+            currentPrompt = prompt;
+            addMessage(prompt, 'user');
+            document.getElementById('promptInput').value = '';
+            autoGrow();
+
+            showTyping();
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const response = await fetch('/api/parse-prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+
+                removeTyping();
+
+                if (data.success) {
+                    await typeResponse(data);
+                } else {
+                    addMessage('Sorry, I couldn\'t process that. Please try again.', 'assistant');
+                }
+            } catch (error) {
+                removeTyping();
+                addMessage('Error: ' + error.message, 'assistant');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            }
+        }
+
+        function addMessage(text, sender) {
+            const area = document.getElementById('messagesArea');
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}`;
+            msg.innerHTML = sender === 'user'
+                ? `<div class="bubble">${text}</div>`
+                : `<div class="content">${text}</div>`;
+            area.appendChild(msg);
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function showTyping() {
+            const area = document.getElementById('messagesArea');
+            const typing = document.createElement('div');
+            typing.id = 'typing';
+            typing.className = 'typing-indicator';
+            typing.innerHTML = `
+                <div class="typing-box">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            area.appendChild(typing);
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function removeTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+
+        async function typeResponse(data) {
+            const area = document.getElementById('messagesArea');
+
+            // Task Analysis
+            const taskHtml = `
+                <div class="message assistant">
+                    <div class="content">
+                        <p>✨ <strong>Perfect! I've analyzed your task.</strong></p>
+                        <div class="analysis-banner">
+                            <div class="analysis-icon">📊</div>
+                            <div class="analysis-details">
+                                <div class="analysis-detail">
+                                    <div class="analysis-detail-label">Task Type</div>
+                                    <div class="analysis-detail-value">${data.task_type || 'Classification'}</div>
+                                </div>
+                                <div class="analysis-detail">
+                                    <div class="analysis-detail-label">Input Type</div>
+                                    <div class="analysis-detail-value">${data.input_type || 'Image'}</div>
+                                </div>
+                                <div class="analysis-detail">
+                                    <div class="analysis-detail-label">Classes</div>
+                                    <div class="analysis-detail-value">${data.num_classes || 'Multiple'}</div>
+                                </div>
+                                <div class="analysis-detail">
+                                    <div class="analysis-detail-label">Difficulty</div>
+                                    <div class="analysis-detail-value">Medium</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            await delay(300);
+            area.innerHTML += taskHtml;
+            area.scrollTop = area.scrollHeight;
+
+            // Set Global Task Type
+            if (data.task_type) {
+                currentLoadedTaskType = data.task_type;
+            }
+
+            // Square Model Cards
+            await delay(500);
+            const modelsHtml = `
+                <div class="message assistant">
+                    <div class="content">
+                        <div class="model-section">
+                            <div class="section-header">
+                                <span>🤖</span>
+                                <span>Recommended Model Architectures</span>
+                            </div>
+                            <div class="model-grid">
+                                ${data.recommended_models.slice(0, 3).map(model => `
+                                    <div class="model-card" onclick="selectModel('${model.name}')">
+                                        <div class="model-card-icon">
+                                            <i class="fas fa-brain"></i>
+                                        </div>
+                                        <h4>${model.name}</h4>
+                                        <p>${model.description}</p>
+                                        <div class="model-specs">
+                                            <span class="spec-badge">⚡ ${model.speed}</span>
+                                            <span class="spec-badge">📦 ${model.size}</span>
+                                            <span class="spec-badge">🎯 ${model.accuracy}</span>
+                                        </div>
+                                        <button class="btn-select">Select Model</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="custom-model-option">
+                                <button class="btn-custom" onclick="createCustomModel()">
+                                    <i class="fas fa-plus-circle"></i> Create Custom Model
+                                </button>
+                            </div>
+
+                            ${data.saved_models && data.saved_models.length > 0 ? `
+                            <div class="section-header" style="margin-top: 2rem;">
+                                <span>🗄️</span>
+                                <span>Available pretrained models for this task</span>
+                            </div>
+                            <div class="model-grid">
+                                ${data.saved_models.map(model => `
+                                    <div class="model-card" onclick="selectStoredModel('${model.id}')">
+                                        <div class="model-card-icon">
+                                            <i class="fas fa-save"></i>
+                                        </div>
+                                        <h4>${model.name}</h4>
+                                        <p>Pre-trained ${model.architecture} network</p>
+                                        <div class="model-specs">
+                                            <span class="spec-badge">🎯 ${model.accuracy}</span>
+                                            <span class="spec-badge">🏷️ ${model.classes} classes</span>
+                                        </div>
+                                        <button class="btn-select">Load Model</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            area.innerHTML += modelsHtml;
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function selectModel(modelName) {
+            window.location.href = `/test-model?model=${encodeURIComponent(modelName)}&task=${encodeURIComponent(currentLoadedTaskType)}`;
+        }
+
+        async function selectStoredModel(modelId) {
+            try {
+                const response = await fetch('/api/load-saved-model', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model_id: modelId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/test-trained-model';
+                } else {
+                    alert('Error loading model: ' + data.error);
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        function createCustomModel() {
+            window.location.href = `/train?custom=true&task=${encodeURIComponent(currentLoadedTaskType)}&prompt=${encodeURIComponent(currentPrompt)}`;
+        }
+    </script>
+</body>
+
+</html>

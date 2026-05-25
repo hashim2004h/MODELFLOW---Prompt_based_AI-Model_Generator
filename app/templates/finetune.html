@@ -1,0 +1,466 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Fine-tune Model - MODELFLOW{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-sliders-h"></i> Fine-tune Model</h1>
+    <p>Customize models with your own data</p>
+</div>
+
+<div class="finetune-section">
+    <div class="card">
+        <h2>1. Select Base Model</h2>
+        
+        <div class="form-group">
+            <label for="baseModelSelect">Base Model:</label>
+            <select id="baseModelSelect" class="form-control">
+                <option value="">-- Select a base model --</option>
+            </select>
+        </div>
+        
+        <div class="model-preview" id="baseModelPreview"></div>
+    </div>
+    
+    <div class="card">
+        <h2>2. Configure Training</h2>
+        
+        <form id="finetuneForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="epochs">Epochs:</label>
+                    <input type="number" id="epochs" class="form-control" value="10" min="1" max="100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="batchSize">Batch Size:</label>
+                    <input type="number" id="batchSize" class="form-control" value="32" min="1" max="256">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="learningRate">Learning Rate:</label>
+                    <input type="number" id="learningRate" class="form-control" value="0.001" step="0.0001" min="0" max="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="validationSplit">Validation Split:</label>
+                    <input type="number" id="validationSplit" class="form-control" value="0.2" step="0.05" min="0" max="0.5">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="augmentation" checked>
+                    <span class="checkmark"></span>
+                    Enable Data Augmentation
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="freezeBase" checked>
+                    <span class="checkmark"></span>
+                    Freeze Base Model Layers (Transfer Learning)
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label for="datasetPath">Dataset Path:</label>
+                <input type="text" id="datasetPath" class="form-control" placeholder="Path to training data">
+                <small>Path to folder containing training images or CSV file</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-large training-button">
+                <i class="fas fa-play"></i> Start Fine-tuning
+            </button>
+        </form>
+    </div>
+    
+    <div class="card" id="trainingProgress" style="display: none;">
+        <h2>3. Training Progress</h2>
+        
+        <div class="progress-info">
+            <div class="progress-item">
+                <span>Status:</span>
+                <strong id="trainingStatus">Initializing...</strong>
+            </div>
+            <div class="progress-item">
+                <span>Epoch:</span>
+                <strong><span id="currentEpoch">0</span> / <span id="totalEpochs">10</span></strong>
+            </div>
+            <div class="progress-item">
+                <span>Loss:</span>
+                <strong id="currentLoss">--</strong>
+            </div>
+            <div class="progress-item">
+                <span>Accuracy:</span>
+                <strong id="currentAccuracy">--</strong>
+            </div>
+        </div>
+        
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="training-metrics">
+            <canvas id="metricsChart" width="600" height="300"></canvas>
+        </div>
+        
+        <div class="training-actions">
+            <button id="stopTrainingBtn" class="btn btn-danger">
+                <i class="fas fa-stop"></i> Stop Training
+            </button>
+        </div>
+    </div>
+    
+    <div class="card" id="trainingResults" style="display: none;">
+        <h2>Training Complete!</h2>
+        
+        <div class="results-summary">
+            <div class="result-card">
+                <h3>Final Accuracy</h3>
+                <div class="result-value" id="finalAccuracy">--</div>
+            </div>
+            
+            <div class="result-card">
+                <h3>Final Loss</h3>
+                <div class="result-value" id="finalLoss">--</div>
+            </div>
+            
+            <div class="result-card">
+                <h3>Training Time</h3>
+                <div class="result-value" id="trainingTime">--</div>
+            </div>
+        </div>
+        
+        <div class="next-steps">
+            <a href="{{ url_for('main.test_page') }}" class="btn btn-primary">
+                <i class="fas fa-vial"></i> Test Model
+            </a>
+            <a href="{{ url_for('main.export_page') }}" class="btn btn-secondary">
+                <i class="fas fa-download"></i> Export Model
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.finetune-section {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.training-button {
+    width: 100%;
+    justify-content: center;
+    border-radius: 50px;
+    padding: 16px;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+}
+
+.progress-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.progress-item {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border-left: 4px solid var(--accent-primary);
+}
+
+.progress-item span {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.progress-item strong {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.progress-bar-container {
+    background: var(--bg-secondary);
+    height: 20px;
+    border-radius: 10px;
+    margin: 2rem 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: linear-gradient(
+        45deg,
+        rgba(255,255,255,0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255,255,255,0.15) 50%,
+        rgba(255,255,255,0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 20px 20px;
+    animation: progressAnimation 1s linear infinite;
+}
+
+@keyframes progressAnimation {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 0; }
+}
+
+.training-metrics {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.training-actions {
+    text-align: center;
+}
+
+.results-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.result-card {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.result-card h3 {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.result-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-primary);
+}
+
+.next-steps {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #ff3742, #ff2e3a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .progress-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .next-steps {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+let trainingId = null;
+let statusCheckInterval = null;
+
+// Load base models
+async function loadBaseModels() {
+    try {
+        const response = await fetch('/api/models/list');
+        const data = await response.json();
+        
+        const select = document.getElementById('baseModelSelect');
+        data.models.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = `${model.name} (${model.architecture})`;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading models:', error);
+    }
+}
+
+// Handle form submission
+document.getElementById('finetuneForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const modelId = document.getElementById('baseModelSelect').value;
+    const datasetPath = document.getElementById('datasetPath').value;
+    
+    if (!modelId || !datasetPath) {
+        alert('Please select a model and provide dataset path');
+        return;
+    }
+    
+    const config = {
+        epochs: parseInt(document.getElementById('epochs').value),
+        batch_size: parseInt(document.getElementById('batchSize').value),
+        learning_rate: parseFloat(document.getElementById('learningRate').value),
+        validation_split: parseFloat(document.getElementById('validationSplit').value),
+        augmentation: document.getElementById('augmentation').checked,
+        freeze_base: document.getElementById('freezeBase').checked
+    };
+    
+    try {
+        const response = await fetch('/api/train', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model_id: modelId,
+                dataset_path: datasetPath,
+                config: config
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            trainingId = data.training_id;
+            document.getElementById('totalEpochs').textContent = config.epochs;
+            
+            // Show progress section
+            document.getElementById('trainingProgress').style.display = 'block';
+            
+            // Start checking status
+            checkTrainingStatus();
+            statusCheckInterval = setInterval(checkTrainingStatus, 2000);
+        } else {
+            alert('Error starting training: ' + data.error);
+        }
+        
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
+
+// Check training status
+async function checkTrainingStatus() {
+    if (!trainingId) return;
+    
+    try {
+        const response = await fetch(`/api/training-status/${trainingId}`);
+        const data = await response.json();
+        
+        // Update UI
+        document.getElementById('trainingStatus').textContent = data.status;
+        document.getElementById('currentEpoch').textContent = data.current_epoch;
+        
+        if (data.metrics) {
+            document.getElementById('currentLoss').textContent = data.metrics.loss?.toFixed(4) || '--';
+            document.getElementById('currentAccuracy').textContent = 
+                data.metrics.accuracy ? (data.metrics.accuracy * 100).toFixed(2) + '%' : '--';
+        }
+        
+        // Update progress bar
+        const progress = (data.current_epoch / data.total_epochs) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+        
+        // Check if completed
+        if (data.status === 'completed') {
+            clearInterval(statusCheckInterval);
+            showResults(data);
+        } else if (data.status === 'failed') {
+            clearInterval(statusCheckInterval);
+            alert('Training failed: ' + data.error);
+        }
+        
+    } catch (error) {
+        console.error('Error checking status:', error);
+    }
+}
+
+// Stop training
+document.getElementById('stopTrainingBtn').addEventListener('click', async function() {
+    if (!trainingId) return;
+    
+    if (!confirm('Are you sure you want to stop training?')) return;
+    
+    try {
+        await fetch(`/api/training-stop/${trainingId}`, { method: 'POST' });
+        clearInterval(statusCheckInterval);
+        alert('Training stopped');
+    } catch (error) {
+        alert('Error stopping training: ' + error.message);
+    }
+});
+
+// Show results
+function showResults(data) {
+    document.getElementById('trainingProgress').style.display = 'none';
+    document.getElementById('trainingResults').style.display = 'block';
+    
+    if (data.metrics) {
+        document.getElementById('finalAccuracy').textContent = 
+            (data.metrics.final_accuracy * 100).toFixed(2) + '%';
+        document.getElementById('finalLoss').textContent = 
+            data.metrics.final_loss.toFixed(4);
+    }
+    
+    if (data.elapsed_time) {
+        const minutes = Math.floor(data.elapsed_time / 60);
+        const seconds = Math.floor(data.elapsed_time % 60);
+        document.getElementById('trainingTime').textContent = `${minutes}m ${seconds}s`;
+    }
+}
+
+// Initialize
+loadBaseModels();
+</script>
+{% endblock %}

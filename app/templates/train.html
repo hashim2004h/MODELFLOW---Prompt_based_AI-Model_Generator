@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Model - AIForge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #00d97e;
+            --primary-rgb: 0, 217, 126;
+            --accent-cyan: #00ffa3;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --light-text: #e8eaed;
+            --secondary-text: #9aa0a6;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --pill-bg: rgba(255, 255, 255, 0.02);
+            --btn-hover: rgba(255, 255, 255, 0.03);
+            --progress-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --primary-green: #0066cc;
+            --primary-rgb: 0, 102, 204;
+            --accent-cyan: #00a2ff;
+            --dark-bg: #f5f7fa;
+            --darker-bg: #ffffff;
+            --card-bg: #ffffff;
+            --light-text: #1a1a1a;
+            --secondary-text: #5f6368;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --pill-bg: rgba(0, 0, 0, 0.02);
+            --btn-hover: rgba(0, 0, 0, 0.05);
+            --progress-bg: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--light-text);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(var(--primary-rgb), 0.03) 0%, transparent 55%),
+                radial-gradient(circle at 85% 30%, rgba(0, 179, 255, 0.03) 0%, transparent 55%);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .train-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .train-header {
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .back-btn {
+            width: 45px;
+            height: 45px;
+            background: var(--btn-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--light-text);
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 217, 126, 0.1);
+            border-color: var(--primary-green);
+            transform: scale(1.1);
+        }
+
+        .train-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .train-header p {
+            color: var(--secondary-text);
+        }
+
+        .training-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .step-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: rgba(var(--primary-rgb), 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .step-card h3 {
+            margin-bottom: 0.8rem;
+        }
+
+        /* Data Input Section */
+        .data-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .data-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--light-text);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-green);
+            color: #000;
+            border-color: var(--primary-green);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Upload Section */
+        .upload-area {
+            display: block;
+            width: 100%;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-green);
+            background: rgba(0, 217, 126, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .training-steps {
+                flex-direction: column;
+            }
+        }
+
+        /* Teachable Machine specific styles */
+        .teachable-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .teachable-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 85px;
+            height: 85px;
+            background: rgba(0, 217, 126, 0.05);
+            /* very light blue tint */
+            border: 1px solid rgba(0, 217, 126, 0.2);
+            border-radius: 8px;
+            color: var(--secondary-text);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .teachable-btn i {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-green);
+            /* specific light blue from teachable */
+        }
+
+        .teachable-btn:hover {
+            background: rgba(0, 217, 126, 0.1);
+            border-color: rgba(0, 217, 126, 0.4);
+            color: var(--light-text);
+        }
+
+        .teachable-btn.active {
+            background: rgba(0, 217, 126, 0.2);
+            border-color: rgba(0, 217, 126, 0.6);
+            color: var(--light-text);
+        }
+
+        /* TM Mic Interface Styles */
+        .tm-mic-interface {
+            display: flex;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .tm-mic-left {
+            flex: 1;
+            border-right: 1px solid var(--border-color);
+            background: rgba(0, 217, 126, 0.03);
+        }
+
+        .tm-mic-right {
+            flex: 1.2;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .tm-mic-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tm-sample-square {
+            width: 100%;
+            height: 65px;
+            background: linear-gradient(180deg, rgba(0, 217, 126, 0.2) 0%, rgba(0, 217, 126, 0.6) 100%);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 217, 126, 0.4);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+            background-image: repeating-linear-gradient(90deg,
+                    transparent,
+                    transparent 1px,
+                    rgba(255, 255, 255, 0.15) 1px,
+                    rgba(255, 255, 255, 0.15) 3px);
+        }
+
+        @media (max-width: 768px) {
+            .tm-mic-interface {
+                flex-direction: column;
+            }
+
+            .tm-mic-left {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+
+        /* Camera Section */
+        #webcam {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--light-text);
+        }
+
+        /* Captured Images */
+        .captured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .captured-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .captured-item img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .captured-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.3rem;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        /* Class Input */
+        .class-input {
+            margin: 1rem 0;
+        }
+
+        .class-input input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.8rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--light-text);
+            font-size: 1rem;
+        }
+
+        /* Training Progress */
+        .training-progress {
+            display: none;
+            background: rgba(0, 217, 126, 0.05);
+            border: 1px solid rgba(0, 217, 126, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .training-progress.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-cyan));
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="train-container">
+        <div class="train-header">
+            <a href="/chat" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1>Train Your Model</h1>
+                <p>Capture or upload images to train your custom AI model</p>
+            </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="training-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Add Training Data</h3>
+                <p>Use webcam or upload images for each class</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Train Model</h3>
+                <p>AI automatically trains on your data</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Test & Export</h3>
+                <p>Test accuracy and export your model</p>
+            </div>
+        </div>
+
+        <!-- Data Input Section -->
+        <div class="data-section">
+            <h2 style="margin-bottom: 1rem;">📸 Add Training Data</h2>
+
+            <!-- Tabs -->
+            <div class="data-tabs" id="classificationTabs">
+                <button class="tab-btn active" onclick="switchTab('camera')">
+                    <i class="fas fa-video"></i> Camera
+                </button>
+                <button class="tab-btn" onclick="switchTab('upload')">
+                    <i class="fas fa-upload"></i> Upload Files
+                </button>
+                <button class="tab-btn" onclick="switchTab('search')">
+                    <i class="fas fa-globe"></i> Web Search
+                </button>
+            </div>
+
+            <div class="data-tabs" id="detectionTabs" style="display: none;">
+                <button class="tab-btn active" onclick="switchTab('yolo-upload')">
+                    <i class="fas fa-box-open"></i> Upload YOLO Dataset (.zip)
+                </button>
+                <button class="tab-btn" onclick="switchTab('detection-csv-upload')">
+                    <i class="fas fa-file-csv"></i> Upload Dataset (.csv)
+                </button>
+            </div>
+
+            <div class="data-tabs" id="textTabs" style="display: none;">
+                <button class="tab-btn active" onclick="switchTab('text-upload')">
+                    <i class="fas fa-file-csv"></i> Upload Text/CSV Dataset
+                </button>
+            </div>
+
+            <!-- Classification Tabs Content -->
+            <div id="camera-tab" class="tab-content active" style="padding: 1rem;">
+                <div class="class-input" style="margin-top: 0;">
+                    <label>Class Name:</label>
+                    <input type="text" id="className" placeholder="e.g., cat, dog, background">
+                </div>
+
+                <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                    <button class="btn btn-secondary" id="startCamera">
+                        <i class="fas fa-video"></i> Start Camera
+                    </button>
+                    <button class="btn btn-primary" id="capture" disabled>
+                        <i class="fas fa-camera"></i> Capture
+                    </button>
+                    <button class="btn btn-secondary" id="stopCamera" disabled>
+                        <i class="fas fa-stop"></i> Stop Camera
+                    </button>
+                </div>
+
+                <video id="webcam" autoplay playsinline
+                    style="max-width: 100%; border-radius: 8px; display: block; border: 1px solid var(--border-color);"></video>
+                <canvas id="canvas" style="display:none;"></canvas>
+            </div>
+
+            <div id="upload-tab" class="tab-content" style="padding: 1rem;">
+                <div class="class-input" style="margin-top: 0;">
+                    <label>Class Name for these images:</label>
+                    <input type="text" id="uploadClassName" placeholder="e.g., cat, dog">
+                </div>
+
+                <label class="upload-area" id="imagesUploadArea" for="uploadFiles"
+                    style="display:block; padding: 3rem; border: 2px dashed var(--border-color); text-align: center; border-radius: 8px; cursor: pointer; margin-top: 1rem; background: var(--card-bg);">
+                    <i class="fas fa-cloud-upload-alt"
+                        style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--light-text); font-size: 1.1rem;">Click or drag images here to upload</p>
+                    <input type="file" id="uploadFiles" accept="image/*" multiple style="display: none;">
+                </label>
+            </div>
+
+            <div id="search-tab" class="tab-content" style="padding: 1rem;">
+                <div class="class-input" style="margin-top: 0;">
+                    <label>Class Name for web search:</label>
+                    <input type="text" id="searchClassName" placeholder="e.g., car, house">
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <input type="text" id="searchQuery" placeholder="Search the web for images..."
+                        style="flex: 1; padding: 1rem; background: var(--dark-bg); border: 1px solid var(--border-color); color: white; border-radius: 8px;">
+                    <button class="btn btn-primary" onclick="searchImages()">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+
+                <div id="searchResults"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
+                    <!-- Image search results will be populated here -->
+                </div>
+            </div>
+
+            <!-- YOLO / Detection Tabs Content -->
+            <div id="yolo-upload-tab" class="tab-content" style="padding: 1rem;">
+                <label class="upload-area" id="yoloUploadArea" for="yoloUploadFile"
+                    style="display:block; padding: 3rem; border: 2px dashed var(--border-color); text-align: center; border-radius: 8px; cursor: pointer; background: var(--card-bg);">
+                    <i class="fas fa-file-archive"
+                        style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--light-text); font-size: 1.1rem;">Click or drag YOLO dataset (.zip) here</p>
+                    <p style="font-size: 0.95rem; color: var(--accent-cyan); margin-top: 0.5rem;" id="yoloUploadStatus">
+                        No file loaded</p>
+                    <input type="file" id="yoloUploadFile" accept=".zip" onchange="handleYoloUpload(event)"
+                        style="display: none;">
+                </label>
+            </div>
+
+            <div id="detection-csv-upload-tab" class="tab-content" style="padding: 1rem;">
+                <label class="upload-area" id="detectionCsvArea" for="detectionCsvUploadFile"
+                    style="display:block; padding: 3rem; border: 2px dashed var(--border-color); text-align: center; border-radius: 8px; cursor: pointer; background: var(--card-bg);">
+                    <i class="fas fa-file-csv"
+                        style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--light-text); font-size: 1.1rem;">Click or drag Object Detection Dataset
+                        (.csv) here</p>
+                    <p style="font-size: 0.95rem; color: var(--accent-cyan); margin-top: 0.5rem;"
+                        id="detectionCsvUploadStatus">No file loaded</p>
+                    <input type="file" id="detectionCsvUploadFile" accept=".csv"
+                        onchange="handleDetectionCsvUpload(event)" style="display: none;">
+                </label>
+            </div>
+
+            <!-- Text Tabs Content -->
+            <div id="text-upload-tab" class="tab-content" style="padding: 1rem;">
+                <label class="upload-area" id="textCsvArea" for="textUploadFile"
+                    style="display:block; padding: 3rem; border: 2px dashed var(--border-color); text-align: center; border-radius: 8px; cursor: pointer; background: var(--card-bg);">
+                    <i class="fas fa-file-csv"
+                        style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--light-text); font-size: 1.1rem;">Click or drag Text Dataset (.csv) here</p>
+                    <p style="font-size: 0.95rem; color: var(--accent-cyan); margin-top: 0.5rem;" id="textUploadStatus">
+                        No file loaded</p>
+                    <input type="file" id="textUploadFile" accept=".csv" onchange="handleTextUpload(event)"
+                        style="display: none;">
+                </label>
+
+                <div class="class-input" style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Text Column
+                            Header:</label>
+                        <input type="text" id="textColumn" value="text" placeholder="e.g. text, message..."
+                            style="width: 100%; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--light-text);">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Label Column
+                            Header:</label>
+                        <input type="text" id="labelColumn" value="label" placeholder="e.g. label, sentiment..."
+                            style="width: 100%; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--light-text);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Workspace -->
+            <div id="audio-workspace" class="tm-mic-interface" style="display: none; align-items: stretch;">
+                <div class="tm-mic-left"
+                    style="display: flex; flex-direction: column; background: transparent; padding-bottom: 1rem; border-right: 1px solid var(--border-color);">
+
+                    <div class="teachable-tabs" id="audioTabs" style="padding: 1rem 1rem 0 1rem; margin-bottom: 0;">
+                        <button class="teachable-btn active" onclick="switchTab('audio-mic')">
+                            <i class="fas fa-microphone"></i>
+                            <span>Mic</span>
+                        </button>
+                        <button class="teachable-btn" onclick="switchTab('audio-upload')">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload</span>
+                        </button>
+                        <button class="teachable-btn" onclick="switchTab('audio-search')">
+                            <i class="fas fa-globe"></i>
+                            <span>Web Search</span>
+                        </button>
+                    </div>
+
+                    <!-- Audio Mic Tab (TM Mode) -->
+                    <div id="audio-mic-tab" class="tab-content" style="padding: 1rem;">
+                        <div class="class-input" style="margin-top: 0;">
+                            <label>Class Name:</label>
+                            <input type="text" id="audioMicClass" placeholder="e.g., Background Noise, Class 2">
+                        </div>
+
+                        <div class="tm-mic-header" style="border: none; padding: 1rem 0 0.5rem 0;">
+                            <span style="color:var(--primary-green); font-weight:500;">Microphone</span>
+                        </div>
+                        <div style="padding: 0;">
+                            <!-- Audio Select -->
+                            <select id="audioSource"
+                                style="width:100%; padding:0.5rem; background:var(--dark-bg); border:1px solid var(--border-color); color:var(--primary-green); border-radius:4px; margin-bottom:1rem; outline:none;">
+                                <option>Switch Microphone</option>
+                            </select>
+
+                            <!-- Visualizer -->
+                            <div id="tmVisualizer"
+                                style="width:100%; height:100px; background:rgba(0, 217, 126, 0.05); border-radius:4px; margin-bottom:1rem; position:relative; display:flex; align-items:flex-end; gap:2px; overflow:hidden;">
+                            </div>
+
+                            <!-- Post Record Controls -->
+                            <div id="postRecordingControls"
+                                style="display:none; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+                                <div style="color:var(--primary-green); display:flex; align-items:center; gap:0.5rem;">
+                                    <i class="fas fa-play" style="cursor:pointer; font-size:1.2rem;"
+                                        id="playAudioRecord"></i>
+                                    <span id="tmTime" style="font-size:0.9rem; font-weight:500;">00:00 / 00:20</span>
+                                </div>
+                                <button id="extractAudioBtn"
+                                    style="background:rgba(0, 217, 126, 0.15); color:var(--primary-green); border:1px solid rgba(0, 217, 126, 0.3); padding:0.5rem 1rem; border-radius:4px; font-weight:600; cursor:pointer; transition:all 0.2s;">
+                                    Extract Sample
+                                </button>
+                            </div>
+
+                            <!-- Record Button -->
+                            <div style="display:flex; align-items:center; gap:1rem;">
+                                <button class="btn btn-primary" id="startRecording"
+                                    style="flex:1; background:var(--primary-green); color:var(--dark-bg); border:none; border-radius:4px; padding:0.8rem; font-weight:600; font-size:1.05rem; transition:all 0.3s;">
+                                    Record 20 Seconds
+                                </button>
+                                <i class="fas fa-cog"
+                                    style="color:var(--primary-green); font-size:1.3rem; cursor:pointer;"></i>
+                            </div>
+                            <div id="recordingStatus"
+                                style="margin-top: 1rem; color: var(--accent-cyan); font-size: 0.9rem; text-align:center;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Upload Tab -->
+                    <div id="audio-upload-tab" class="tab-content" style="padding: 1rem;">
+                        <div class="class-input" style="margin-top: 0;">
+                            <label>Class Name for uploaded audio:</label>
+                            <input type="text" id="audioUploadClass" placeholder="e.g., Background Noise, Class 2">
+                        </div>
+                        <label class="upload-area" id="audioUploadArea" for="audioUploadFiles">
+                            <i class="fas fa-file-audio"></i>
+                            <p>Click to upload Audio Files (.wav, .mp3)</p>
+                            <input type="file" id="audioUploadFiles" accept="audio/*" multiple
+                                onchange="handleAudioUpload(event)"
+                                style="width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; position: absolute; z-index: -1;">
+                        </label>
+                    </div>
+
+                    <!-- Audio Web Search Tab -->
+                    <div id="audio-search-tab" class="tab-content" style="padding: 1rem;">
+                        <div class="class-input" style="margin-top: 0;">
+                            <label>Class Name for web audio:</label>
+                            <input type="text" id="audioSearchClassName" placeholder="e.g., cat, dog, birds">
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                            <input type="text" id="audioSearchQuery" placeholder="Search internet for audio..."
+                                style="flex: 1; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); color: white; border-radius: 8px;">
+                            <button class="btn btn-primary" onclick="searchAudio()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+
+                        <div id="audioSearchResults"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <!-- Search results here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tm-mic-right" style="background: var(--card-bg);">
+                    <div
+                        style="padding:1rem; border-bottom:1px solid var(--border-color); color:var(--secondary-text); font-size:0.95rem;">
+                        <strong id="audioSampleCount" style="color:var(--light-text);">0</strong> Audio Samples
+                        <span style="color:#e67e22; margin-left:0.5rem; font-size:0.85rem;">/ 20 minimum</span>
+                    </div>
+                    <div id="audioCapturedGrid"
+                        style="display:grid; grid-template-columns:repeat(auto-fill, minmax(65px, 1fr)); gap:0.5rem; padding:1rem; max-height: 500px; overflow-y: auto;">
+                        <!-- Audio samples appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="captured-grid" id="capturedGrid">
+                <!-- Images appear here -->
+            </div>
+
+            <!-- Model Selection -->
+            <div class="class-input" style="margin-top: 2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Select Model
+                    Architecture:</label>
+                <select id="modelSelect"
+                    style="width: 100%; padding: 1rem; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--light-text); border-radius: 8px; font-size: 1rem;">
+                </select>
+            </div>
+
+            <!-- Training Button -->
+            <button class="btn btn-primary" id="trainModel" style="width: 100%; font-size: 1.1rem; padding: 1.2rem;">
+                <i class="fas fa-play"></i> Start Training
+            </button>
+
+            <!-- Training Progress -->
+            <div class="training-progress" id="trainingProgress">
+                <h3>Training in Progress...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">Epoch 0/50 - Metrics: --</p>
+            </div>
+        </div>
+
+        <script>
+            // Initialize theme
+            document.addEventListener('DOMContentLoaded', () => {
+                if (localStorage.getItem('theme') === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            });
+
+            const taskMode = "{{ task_type }}";
+            const preselectedModelName = "{{ preselected_model }}";
+            let yoloZipFile = null;
+            let detectionCsvFile = null;
+
+            // Initialization based on Task Mode
+            window.addEventListener('load', () => {
+                const modelSelect = document.getElementById('modelSelect');
+                if (taskMode === 'object_detection') {
+                    document.getElementById('classificationTabs').style.display = 'none';
+                    document.getElementById('detectionTabs').style.display = 'flex';
+                    document.getElementById('textTabs').style.display = 'none';
+                    switchTab('yolo-upload');
+
+                    // Setup Detection models
+                    modelSelect.innerHTML = `
+                        <option value="yolov8n">YOLOv8n (Fastest, Small Size)</option>
+                        <option value="yolov8s">YOLOv8s (Balanced Accuracy and Speed)</option>
+                    `;
+                } else if (taskMode === 'text_classification' || taskMode === 'sentiment_analysis') {
+                    document.getElementById('classificationTabs').style.display = 'none';
+                    document.getElementById('detectionTabs').style.display = 'none';
+                    document.getElementById('textTabs').style.display = 'flex';
+                    switchTab('text-upload');
+
+                    // Setup Text models
+                    modelSelect.innerHTML = `
+                        <option value="tfidf">TF-IDF + Logistic Regression (Fast/Reliable)</option>
+                        <option value="distilbert">DistilBERT (High Accuracy - Experimental)</option>
+                        <option value="roberta">RoBERTa (Highest Accuracy - Experimental)</option>
+                    `;
+                } else if (taskMode === 'audio_classification') {
+                    document.getElementById('classificationTabs').style.display = 'none';
+                    document.getElementById('detectionTabs').style.display = 'none';
+                    document.getElementById('textTabs').style.display = 'none';
+                    document.getElementById('audio-workspace').style.display = 'flex';
+                    switchTab('audio-mic');
+
+                    modelSelect.innerHTML = `
+                        <option value="simple_cnn">Simple CNN (Spectrogram)</option>
+                        <option value="mobilenet_v2">MobileNetV2 (Spectrogram Transfer Learning)</option>
+                    `;
+                } else {
+                    document.getElementById('classificationTabs').style.display = 'flex';
+                    document.getElementById('detectionTabs').style.display = 'none';
+                    document.getElementById('textTabs').style.display = 'none';
+                    if (document.getElementById('audio-workspace')) document.getElementById('audio-workspace').style.display = 'none';
+                    switchTab('camera');
+
+                    // Setup Classification models
+                    modelSelect.innerHTML = `
+                        <option value="automl">✨ AutoML (Best Accuracy - Recommended)</option>
+                        <option value="mobilenet_v2">MobileNetV2 (Fastest, Small Size)</option>
+                        <option value="resnet50">ResNet50 (High Accuracy, Larger Size)</option>
+                        <option value="efficientnet_b0">EfficientNetB0 (Balanced)</option>
+                        <option value="custom_cnn">Custom Neural Network (Simple CNN)</option>
+                    `;
+                }
+
+                if (preselectedModelName && preselectedModelName !== "None") {
+                    // Try to map the UI name to internal value or direct match
+                    const opts = Array.from(modelSelect.options);
+                    // Match by text (e.g. "RoBERTa (Sentiment)") or lower value
+                    const targetText = preselectedModelName.toLowerCase();
+                    for (let opt of opts) {
+                        if (opt.text.toLowerCase().includes(targetText) || opt.value.toLowerCase() === targetText) {
+                            modelSelect.value = opt.value;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            function handleYoloUpload(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    yoloZipFile = files[0];
+                    document.getElementById('yoloUploadStatus').textContent = `Loaded: ${yoloZipFile.name}`;
+                }
+            }
+
+            function handleDetectionCsvUpload(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    detectionCsvFile = files[0];
+                    document.getElementById('detectionCsvUploadStatus').textContent = `Loaded: ${detectionCsvFile.name}`;
+                }
+            }
+
+            let textCsvFile = null;
+            function handleTextUpload(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    textCsvFile = files[0];
+                    document.getElementById('textUploadStatus').textContent = `Loaded: ${textCsvFile.name}`;
+                }
+            }
+
+            // Drag and Drop helpers
+            function attachDragDrop(areaId, inputId, handlerObj) {
+                const area = document.getElementById(areaId);
+                const input = document.getElementById(inputId);
+                if (!area || !input) return;
+
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    area.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    area.addEventListener(eventName, () => {
+                        area.style.borderColor = 'var(--primary-green)';
+                        area.style.background = 'rgba(0, 217, 126, 0.05)';
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    area.addEventListener(eventName, () => {
+                        area.style.borderColor = 'var(--border-color)';
+                        area.style.background = 'transparent';
+                    }, false);
+                });
+
+                area.addEventListener('drop', (e) => {
+                    let dt = e.dataTransfer;
+                    let files = dt.files;
+                    if (files.length > 0) {
+                        input.files = files; // Assign files to input
+                        handlerObj.handler({ target: input }); // Manually trigger logic
+                    }
+                }, false);
+            }
+
+            window.addEventListener('load', () => {
+                attachDragDrop('imagesUploadArea', 'uploadFiles', { handler: handleUpload });
+                attachDragDrop('yoloUploadArea', 'yoloUploadFile', { handler: handleYoloUpload });
+                attachDragDrop('detectionCsvArea', 'detectionCsvUploadFile', { handler: handleDetectionCsvUpload });
+                attachDragDrop('textCsvArea', 'textUploadFile', { handler: handleTextUpload });
+                attachDragDrop('audioUploadArea', 'audioUploadFiles', { handler: handleAudioUpload });
+            });
+
+            let stream = null;
+            let capturedImages = [];
+            const webcam = document.getElementById('webcam');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Tab switching
+            function switchTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('.tab-btn, .teachable-btn').forEach(btn => btn.classList.remove('active'));
+                const targetBtn = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+                if (targetBtn) targetBtn.classList.add('active');
+
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            }
+
+            // Handle file upload
+            function handleUpload(event) {
+                const files = event.target.files;
+                const className = document.getElementById('uploadClassName').value.trim();
+
+                if (!className) {
+                    alert('Please enter a class name first');
+                    return;
+                }
+
+                for (let file of files) {
+                    if (file && file.type.startsWith('image/')) { // Only process image files
+                        const url = URL.createObjectURL(file);
+                        capturedImages.push({ blob: file, className, url, type: 'image' });
+                        displayCaptured();
+                    }
+                }
+            }
+
+            // Handle audio file upload
+            function handleAudioUpload(event) {
+                const files = event.target.files;
+                const className = document.getElementById('audioUploadClass').value.trim();
+
+                if (!className) {
+                    alert('Please enter a class name first');
+                    return;
+                }
+
+                for (let file of files) {
+                    if (file && file.type.startsWith('audio/')) {
+                        const url = URL.createObjectURL(file);
+                        capturedImages.push({ blob: file, className, url, type: 'audio' });
+                        displayCaptured();
+                    }
+                }
+            }
+
+            // --- Teachable Machine Audio Logic ---
+            const startRecordingBtn = document.getElementById('startRecording');
+            const extractAudioBtn = document.getElementById('extractAudioBtn');
+            const recordingStatus = document.getElementById('recordingStatus');
+            const visualizer = document.getElementById('tmVisualizer');
+            const postRecControls = document.getElementById('postRecordingControls');
+
+            let audioContext;
+            let micStream;
+            let mediaRecorder;
+            let audioChunks20s = [];
+            let recordedBlob20s = null;
+            let recordingTimer = null;
+            let visualizerTimer = null;
+
+            function drawFakeVisualizer() {
+                const bar = document.createElement('div');
+                bar.style.width = '3px';
+                bar.style.background = 'var(--primary-green)';
+                bar.style.height = (Math.random() * 80 + 10) + '%';
+                visualizer.appendChild(bar);
+                if (visualizer.children.length > 80) {
+                    visualizer.removeChild(visualizer.firstChild);
+                }
+            }
+
+            if (startRecordingBtn) {
+                startRecordingBtn.addEventListener('click', async () => {
+                    const className = document.getElementById('audioMicClass').value.trim();
+                    if (!className) {
+                        alert('Please enter a class name first');
+                        return;
+                    }
+
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                        return;
+                    }
+
+                    try {
+                        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(micStream);
+                        audioChunks20s = [];
+                        recordedBlob20s = null;
+
+                        postRecControls.style.display = 'none';
+                        visualizer.innerHTML = '';
+
+                        mediaRecorder.ondataavailable = (e) => {
+                            if (e.data.size > 0) audioChunks20s.push(e.data);
+                        };
+
+                        mediaRecorder.onstop = () => {
+                            clearInterval(visualizerTimer);
+                            recordedBlob20s = new Blob(audioChunks20s, { type: 'audio/webm' });
+                            micStream.getTracks().forEach(track => track.stop());
+
+                            startRecordingBtn.disabled = false;
+                            startRecordingBtn.textContent = 'Record 20 Seconds';
+                            startRecordingBtn.style.background = 'var(--primary-green)';
+                            recordingStatus.textContent = '';
+
+                            postRecControls.style.display = 'flex';
+                            extractAudioBtn.textContent = 'Extract Sample';
+                            extractAudioBtn.disabled = false;
+                        };
+
+                        mediaRecorder.start(100);
+                        startRecordingBtn.textContent = 'Recording... (Click to stop)';
+                        startRecordingBtn.style.background = '#e74c3c';
+                        recordingStatus.textContent = 'Recording up to 20 seconds...';
+                        visualizerTimer = setInterval(drawFakeVisualizer, 100);
+
+                        recordingTimer = setTimeout(() => {
+                            if (mediaRecorder.state === 'recording') mediaRecorder.stop();
+                        }, 20000);
+
+                    } catch (err) {
+                        alert('Microphone access denied: ' + err.message);
+                    }
+                });
+            }
+
+            // Audio Buffer to WAV encoder for robust offline slicing
+            function audioBufferToWav(buffer) {
+                let numOfChan = buffer.numberOfChannels,
+                    length = buffer.length * numOfChan * 2 + 44,
+                    bufferArr = new ArrayBuffer(length),
+                    view = new DataView(bufferArr),
+                    channels = [], i, sample,
+                    offset = 0, pos = 0;
+
+                function set16(data) { view.setUint16(offset, data, true); offset += 2; }
+                function set32(data) { view.setUint32(offset, data, true); offset += 4; }
+
+                set32(0x46464952); set32(length - 8); set32(0x45564157); set32(0x20746d66);
+                set32(16); set16(1); set16(numOfChan); set32(buffer.sampleRate);
+                set32(buffer.sampleRate * 2 * numOfChan); set16(numOfChan * 2); set16(16);
+                set32(0x61746164); set32(length - pos - 4);
+
+                for (i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+                while (pos < buffer.length) {
+                    for (i = 0; i < numOfChan; i++) {
+                        sample = Math.max(-1, Math.min(1, channels[i][pos]));
+                        sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                        set16(sample);
+                    }
+                    pos++;
+                }
+                return new Blob([bufferArr], { type: "audio/wav" });
+            }
+
+            if (extractAudioBtn) {
+                extractAudioBtn.addEventListener('click', async () => {
+                    if (!recordedBlob20s) return;
+                    const className = document.getElementById('audioMicClass').value.trim();
+
+                    extractAudioBtn.textContent = 'Extracting...';
+                    extractAudioBtn.disabled = true;
+
+                    try {
+                        const arrayBuffer = await recordedBlob20s.arrayBuffer();
+                        const actx = new (window.AudioContext || window.webkitAudioContext)();
+                        const audioBuffer = await actx.decodeAudioData(arrayBuffer);
+
+                        const numChannels = audioBuffer.numberOfChannels;
+                        const sampleRate = audioBuffer.sampleRate;
+                        const snippetFrames = sampleRate * 1; // 1 second chunks
+                        const totalFrames = audioBuffer.length;
+
+                        let extractedBlobs = [];
+                        for (let start = 0; start + snippetFrames <= totalFrames; start += snippetFrames) {
+                            const oCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(numChannels, snippetFrames, sampleRate);
+                            const source = oCtx.createBufferSource();
+                            const chunkBuffer = oCtx.createBuffer(numChannels, snippetFrames, sampleRate);
+                            for (let c = 0; c < numChannels; c++) {
+                                const chData = audioBuffer.getChannelData(c);
+                                const chunkData = new Float32Array(snippetFrames);
+                                chunkData.set(chData.subarray(start, start + snippetFrames));
+                                chunkBuffer.copyToChannel(chunkData, c);
+                            }
+                            source.buffer = chunkBuffer;
+                            source.connect(oCtx.destination);
+                            source.start();
+
+                            const renderedBuffer = await oCtx.startRendering();
+                            extractedBlobs.push(audioBufferToWav(renderedBuffer));
+                        }
+
+                        if (extractedBlobs.length === 0) {
+                            extractedBlobs.push(recordedBlob20s); // fallback to original if shorter than 1s
+                        }
+
+                        extractedBlobs.forEach(blob => {
+                            const url = URL.createObjectURL(blob);
+                            capturedImages.push({ blob, className, url, type: 'audio' });
+                        });
+
+                        displayCaptured();
+
+                        extractAudioBtn.textContent = 'Extracted ' + extractedBlobs.length + ' samples';
+                    } catch (e) {
+                        alert("Error extracting samples: " + e.message);
+                        extractAudioBtn.textContent = 'Extract Sample';
+                        extractAudioBtn.disabled = false;
+                    }
+                });
+            }
+
+            // Web Search Functions
+            async function searchImages() {
+                const query = document.getElementById('searchQuery').value;
+                const className = document.getElementById('searchClassName').value.trim();
+
+                if (!className) return alert("Please enter a class name first");
+                if (!query) return alert("Please enter a search term");
+
+                const resultsDiv = document.getElementById('searchResults');
+                resultsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Searching...</div>';
+
+                try {
+                    const response = await fetch('/api/search-images', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query, max_results: 12 })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        resultsDiv.innerHTML = `
+                            <div style="grid-column: 1/-1; display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                                <button onclick="selectAllWebImages('${className}')" type="button" style="background: var(--primary-green); color: black; border: none; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                    <i class="fas fa-check-double"></i> Select All & Add
+                                </button>
+                            </div>
+                        ` + data.urls.map(url => `
+                            <div class="captured-item" onclick="addWebImage('${url}', '${className}', this)" style="cursor: pointer; border: 2px solid transparent; position: relative;">
+                                <img src="${url}" style="pointer-events: none;">
+                                <div class="captured-label add-label"><i class="fas fa-plus"></i> Click to Add</div>
+                                <div class="added-tick" style="display: none; position: absolute; top: 10px; right: 10px; background: var(--primary-green); color: black; border-radius: 50%; width: 30px; height: 30px; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"><i class="fas fa-check"></i></div>
+                            </div>
+                        `).join('');
+                    } else {
+                        resultsDiv.innerHTML = `<div style="color: red;">Error: ${data.error}</div>`;
+                    }
+                } catch (e) {
+                    resultsDiv.innerHTML = `<div style="color: red;">Error: ${e.message}</div>`;
+                }
+            }
+
+            function selectAllWebImages(className) {
+                const items = document.querySelectorAll('#searchResults .captured-item');
+                let count = 0;
+                items.forEach(item => {
+                    const url = item.querySelector('img').src;
+                    if (!capturedImages.some(img => img.url === url)) {
+                        capturedImages.push({ type: 'url', url, className });
+                        item.style.borderColor = 'var(--primary-green)';
+                        const tick = item.querySelector('.added-tick');
+                        if (tick) tick.style.display = 'flex';
+                        const label = item.querySelector('.add-label');
+                        if (label) {
+                            label.innerHTML = '<i class="fas fa-check"></i> Added';
+                            label.style.background = 'var(--primary-green)';
+                            label.style.color = 'black';
+                        }
+                        count++;
+                    }
+                });
+                
+                if (count > 0) {
+                    displayCaptured();
+                    const toast = document.createElement('div');
+                    toast.textContent = `Added ${count} images to class '${className}'`;
+                    toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: var(--primary-green); color: black; padding: 1rem; border-radius: 8px; z-index: 1000; animation: fadeOut 3s forwards;';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                } else {
+                    alert("All images are already added!");
+                }
+            }
+
+            function addWebImage(url, className, element) {
+                // Check if already added
+                if (capturedImages.some(img => img.url === url)) {
+                    alert("This image is already added!");
+                    return;
+                }
+                capturedImages.push({ type: 'url', url, className });
+                displayCaptured();
+
+                // Visual feedback
+                if (element) {
+                    element.style.borderColor = 'var(--primary-green)';
+                    const tick = element.querySelector('.added-tick');
+                    if (tick) tick.style.display = 'flex';
+                    const label = element.querySelector('.add-label');
+                    if (label) {
+                        label.innerHTML = '<i class="fas fa-check"></i> Added';
+                        label.style.background = 'var(--primary-green)';
+                        label.style.color = 'black';
+                    }
+                }
+
+                const toast = document.createElement('div');
+                toast.textContent = `Added 1 image to class '${className}'`;
+                toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: var(--primary-green); color: black; padding: 1rem; border-radius: 8px; z-index: 1000; animation: fadeOut 3s forwards;';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            async function searchAudio() {
+                const query = document.getElementById('audioSearchQuery').value;
+                const className = document.getElementById('audioSearchClassName').value.trim();
+
+                if (!className) return alert("Please enter a class name first");
+                if (!query) return alert("Please enter a search term");
+
+                const resultsDiv = document.getElementById('audioSearchResults');
+                resultsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Searching audio...</div>';
+
+                try {
+                    const response = await fetch('/api/search-audio', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query, max_results: 12 })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        resultsDiv.innerHTML = `
+                            <div style="grid-column: 1/-1; display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                                <button onclick="selectAllWebAudio('${className}')" type="button" style="background: var(--primary-green); color: black; border: none; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                    <i class="fas fa-check-double"></i> Select All & Add
+                                </button>
+                            </div>
+                        ` + data.urls.map(url => `
+                            <div class="captured-item" style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                <audio controls src="${url}" style="width: 100%; margin-bottom: 10px;"></audio>
+                                <button class="btn btn-secondary add-audio-btn" data-url="${url}" data-class="${className}" style="width: 100%; font-size: 0.8rem;" onclick="addWebAudio('${url}', '${className}', this)">
+                                    <i class="fas fa-plus"></i> Add to ${className}
+                                </button>
+                            </div>
+                        `).join('');
+                        setTimeout(updateAudioSearchVisuals, 100);
+                    } else {
+                        resultsDiv.innerHTML = `<div style="color: red;">Error: ${data.error}</div>`;
+                    }
+                } catch (e) {
+                    resultsDiv.innerHTML = `<div style="color: red;">Error: ${e.message}</div>`;
+                }
+            }
+
+            async function selectAllWebAudio(className) {
+                const buttons = document.querySelectorAll('#audioSearchResults .add-audio-btn:not([disabled])');
+                if (buttons.length === 0) {
+                    alert("All audio clips are already added!");
+                    return;
+                }
+
+                const toast = document.createElement('div');
+                toast.textContent = `Processing and adding ${buttons.length} audio files...`;
+                toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; padding: 1rem; border-radius: 8px; z-index: 1000;';
+                document.body.appendChild(toast);
+
+                for(let btn of buttons) {
+                    btn.innerHTML = 'Processing...';
+                    const url = btn.getAttribute('data-url');
+                    await addWebAudio(url, className, btn, true);
+                }
+
+                toast.textContent = `Successfully added all selected audio to '${className}'`;
+                toast.style.background = 'var(--primary-green)';
+                toast.style.color = 'black';
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            async function addWebAudio(url, className, btnElement, silent=false) {
+                // Check if already added
+                if (capturedImages.some(img => img.originalUrl === url && img.type === 'audio')) {
+                    if (btnElement) {
+                        btnElement.innerHTML = '<i class="fas fa-check"></i> Added';
+                        btnElement.style.background = 'var(--primary-green)';
+                        btnElement.style.color = 'black';
+                        btnElement.disabled = true;
+                    }
+                    return;
+                }
+
+                try {
+                    const proxyUrl = '/api/proxy-audio?url=' + encodeURIComponent(url);
+                    const response = await fetch(proxyUrl);
+                    const arrayBuffer = await response.arrayBuffer();
+
+                    const actx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioBuffer = await actx.decodeAudioData(arrayBuffer);
+
+                    const numChannels = audioBuffer.numberOfChannels;
+                    const sampleRate = audioBuffer.sampleRate;
+                    const snippetFrames = sampleRate * 5; // 5 second chunks
+                    const totalFrames = audioBuffer.length;
+
+                    let extractedBlobs = [];
+                    for (let start = 0; start + snippetFrames <= totalFrames; start += snippetFrames) {
+                        const oCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(numChannels, snippetFrames, sampleRate);
+                        const source = oCtx.createBufferSource();
+                        const chunkBuffer = oCtx.createBuffer(numChannels, snippetFrames, sampleRate);
+                        for (let c = 0; c < numChannels; c++) {
+                            const chData = audioBuffer.getChannelData(c);
+                            const chunkData = new Float32Array(snippetFrames);
+                            chunkData.set(chData.subarray(start, start + snippetFrames));
+                            chunkBuffer.copyToChannel(chunkData, c);
+                        }
+                        source.buffer = chunkBuffer;
+                        source.connect(oCtx.destination);
+                        source.start();
+
+                        const renderedBuffer = await oCtx.startRendering();
+                        extractedBlobs.push(audioBufferToWav(renderedBuffer));
+                    }
+
+                    if (extractedBlobs.length === 0) {
+                        // For audio less than 5 seconds, fallback to 1 chunk of the whole length
+                        const oCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(numChannels, totalFrames, sampleRate);
+                        const source = oCtx.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.connect(oCtx.destination);
+                        source.start();
+                        const renderedBuffer = await oCtx.startRendering();
+                        extractedBlobs.push(audioBufferToWav(renderedBuffer));
+                    }
+
+                    extractedBlobs.forEach(blob => {
+                        const localUrl = URL.createObjectURL(blob);
+                        capturedImages.push({ blob: blob, className, url: localUrl, originalUrl: url, type: 'audio' });
+                    });
+
+                    displayCaptured();
+
+                    // Visual feedback
+                    if (btnElement) {
+                        btnElement.innerHTML = '<i class="fas fa-check"></i> Added';
+                        btnElement.style.background = 'var(--primary-green)';
+                        btnElement.style.color = 'black';
+                        btnElement.disabled = true;
+                    }
+
+                    if (!silent) {
+                        const toast = document.createElement('div');
+                        toast.textContent = `Added ${extractedBlobs.length} audio pieces to class '${className}'`;
+                        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: var(--primary-green); color: black; padding: 1rem; border-radius: 8px; z-index: 1000; animation: fadeOut 3s forwards;';
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+                } catch (err) {
+                    alert("Could not fetch or process the audio. Please try another or use the Upload tab. Error: " + err.message);
+                }
+            }
+
+
+
+            // Camera functions (same as before)
+            document.getElementById('startCamera').addEventListener('click', async () => {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    webcam.srcObject = stream;
+                    document.getElementById('startCamera').disabled = true;
+                    document.getElementById('capture').disabled = false;
+                    document.getElementById('stopCamera').disabled = false;
+                } catch (err) {
+                    alert('Camera access denied: ' + err.message);
+                }
+            });
+
+            function captureImage() {
+                const className = document.getElementById('className').value.trim();
+                if (!className) {
+                    alert('Please enter a class name');
+                    return;
+                }
+
+                canvas.width = webcam.videoWidth;
+                canvas.height = webcam.videoHeight;
+                ctx.drawImage(webcam, 0, 0);
+
+                canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    capturedImages.push({ blob, className, url, type: 'image' });
+                    displayCaptured();
+                });
+            }
+
+            document.getElementById('capture').addEventListener('click', captureImage);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !document.getElementById('capture').disabled) {
+                    e.preventDefault();
+                    captureImage();
+                }
+            });
+
+            document.getElementById('stopCamera').addEventListener('click', () => {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    webcam.srcObject = null;
+                    document.getElementById('startCamera').disabled = false;
+                    document.getElementById('capture').disabled = true;
+                    document.getElementById('stopCamera').disabled = true;
+                }
+            });
+
+            function deleteSample(idx) {
+                capturedImages.splice(idx, 1);
+                displayCaptured();
+                if (typeof updateImageSearchVisuals === 'function') updateImageSearchVisuals();
+                if (typeof updateAudioSearchVisuals === 'function') updateAudioSearchVisuals();
+            }
+
+            function updateImageSearchVisuals() {
+                const items = document.querySelectorAll('#searchResults .captured-item');
+                items.forEach(item => {
+                    const imgEl = item.querySelector('img');
+                    if (!imgEl) return;
+                    const url = imgEl.src;
+                    const tick = item.querySelector('.added-tick');
+                    const label = item.querySelector('.add-label');
+                    
+                    if (capturedImages.some(img => img.url === url)) {
+                        item.style.borderColor = 'var(--primary-green)';
+                        if (tick) tick.style.display = 'flex';
+                        if (label) {
+                            label.innerHTML = '<i class="fas fa-check"></i> Added';
+                            label.style.background = 'var(--primary-green)';
+                            label.style.color = 'black';
+                        }
+                    } else {
+                        item.style.borderColor = 'transparent';
+                        if (tick) tick.style.display = 'none';
+                        if (label) {
+                            label.innerHTML = '<i class="fas fa-plus"></i> Click to Add';
+                            label.style.background = 'rgba(0, 0, 0, 0.7)';
+                            label.style.color = 'white';
+                        }
+                    }
+                });
+            }
+
+            function updateAudioSearchVisuals() {
+                const buttons = document.querySelectorAll('#audioSearchResults .add-audio-btn');
+                buttons.forEach(btn => {
+                    const url = btn.getAttribute('data-url');
+                    const isAdded = capturedImages.some(img => img.originalUrl === url && img.type === 'audio');
+                    
+                    if (isAdded) {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Added';
+                        btn.style.background = 'var(--primary-green)';
+                        btn.style.color = 'black';
+                        btn.disabled = true;
+                    } else {
+                        const className = btn.getAttribute('data-class');
+                        btn.innerHTML = '<i class="fas fa-plus"></i> Add to ' + className;
+                        btn.style.background = ''; // reset to default css classes
+                        btn.style.color = '';
+                        btn.disabled = false;
+                    }
+                });
+            }
+
+            function displayCaptured() {
+                const globalGrid = document.getElementById('capturedGrid');
+                const audioGrid = document.getElementById('audioCapturedGrid');
+
+                if (taskMode === 'audio_classification') {
+                    if (globalGrid) globalGrid.style.display = 'none';
+                    if (audioGrid) {
+                        const audioCount = capturedImages.filter(i => i.type === 'audio').length;
+                        const countEl = document.getElementById('audioSampleCount');
+                        if (countEl) countEl.textContent = audioCount;
+
+                        audioGrid.innerHTML = capturedImages.map((img, idx) => {
+                            if (img.type === 'audio') {
+                                return `
+                                <div class="tm-sample-square" title="${img.className}" style="position: relative;">
+                                    <div onclick="deleteSample(${idx})" style="position: absolute; top: 2px; right: 2px; color: white; background: rgba(255,0,0,0.7); border-radius: 50%; width: 15px; height: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; z-index: 10;" title="Delete">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                    <div style="font-size: 0.65rem; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 4px; color: white; margin-bottom: 2px; text-align: center; width: 90%; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+                                        ${img.className}
+                                    </div>
+                                </div>
+                                `;
+                            }
+                            return '';
+                        }).join('');
+                    }
+                } else {
+                    if (globalGrid) {
+                        globalGrid.style.display = 'grid';
+                        globalGrid.innerHTML = capturedImages.map((img, idx) => {
+                            return `
+                            <div class="captured-item" style="position: relative;">
+                                <div onclick="deleteSample(${idx})" style="position: absolute; top: 5px; right: 5px; color: white; background: rgba(255,0,0,0.7); border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; z-index: 10;" title="Delete">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <img src="${img.url}">
+                                <div class="captured-label">${img.className || img.type}</div>
+                            </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            }
+
+            // Train Model - REAL TRAINING (same as before)
+            document.getElementById('trainModel').addEventListener('click', async () => {
+                const selectedModel = document.getElementById('modelSelect').value;
+                const formData = new FormData();
+                formData.append('backbone', selectedModel);
+                formData.append('prompt', "{{ prompt }}");
+
+                let endpoint = '/api/train-model';
+
+                if (taskMode === 'object_detection') {
+                    if (yoloZipFile) {
+                        formData.append('yolo_zip', yoloZipFile);
+                        endpoint = '/api/train-yolo';
+                    } else if (detectionCsvFile) {
+                        formData.append('csv_file', detectionCsvFile);
+                        endpoint = '/api/train-yolo'; // The backend will be updated to handle CSV for this endpoint
+                    } else {
+                        alert('Please upload a YOLO dataset zip file or a CSV file');
+                        return;
+                    }
+                } else if (taskMode === 'text_classification' || taskMode === 'sentiment_analysis') {
+                    if (!textCsvFile) {
+                        alert('Please upload a Text dataset CSV file');
+                        return;
+                    }
+                    formData.append('csv_file', textCsvFile);
+                    formData.append('text_column', document.getElementById('textColumn').value);
+                    formData.append('label_column', document.getElementById('labelColumn').value);
+                    endpoint = '/api/train-text';
+                } else if (taskMode === 'audio_classification') {
+                    if (capturedImages.length === 0) {
+                        alert('Please add some training audio first');
+                        return;
+                    }
+                    const classes = [...new Set(capturedImages.map(img => img.className))];
+                    if (classes.length < 2) {
+                        alert('Please add audio for at least 2 different classes');
+                        return;
+                    }
+                    let fileCounter = 0;
+                    capturedImages.forEach((img) => {
+                        formData.append(`audio_${fileCounter}`, img.blob, 'audio.webm');
+                        formData.append(`class_${fileCounter}`, img.className);
+                        fileCounter++;
+                    });
+                    endpoint = '/api/train-audio';
+                } else {
+                    if (capturedImages.length === 0) {
+                        alert('Please add some training images first');
+                        return;
+                    }
+
+                    const classes = [...new Set(capturedImages.map(img => img.className))];
+                    if (classes.length < 2) {
+                        alert('Please add images for at least 2 different classes');
+                        return;
+                    }
+
+                    if (capturedImages.length < 10) {
+                        alert('Please add at least 10 images total for better accuracy');
+                        return;
+                    }
+
+                    let fileCounter = 0;
+                    let urlCounter = 0;
+
+                    capturedImages.forEach((img, idx) => {
+                        if (img.type === 'url') {
+                            formData.append(`image_url_${urlCounter}`, img.url);
+                            formData.append(`class_url_${urlCounter}`, img.className);
+                            urlCounter++;
+                        } else {
+                            formData.append(`image_${fileCounter}`, img.blob);
+                            formData.append(`class_${fileCounter}`, img.className);
+                            fileCounter++;
+                        }
+                    });
+                }
+
+                const trainBtn = document.getElementById('trainModel');
+                trainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training Started...';
+                trainBtn.disabled = true;
+
+                document.getElementById('trainingProgress').classList.add('show');
+
+                // Add simulated progress for synchronous tasks since they block the server response
+                let fakeProgress = 0;
+                let fakeProgressInterval = null;
+                if (taskMode !== 'object_detection') {
+                    fakeProgressInterval = setInterval(() => {
+                        fakeProgress += (95 - fakeProgress) * 0.05; // slowly approach 95%
+                        document.getElementById('progressFill').style.width = `${fakeProgress}%`;
+                        document.getElementById('progressText').textContent = `Training in progress... ${Math.round(fakeProgress)}%`;
+                    }, 200);
+                } else {
+                    document.getElementById('progressText').textContent = `Starting training with ${selectedModel}...`;
+                }
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        throw new Error(data.error || 'Training failed to start');
+                    }
+
+                    if (data.cached) {
+                        clearInterval(fakeProgressInterval);
+                        document.getElementById('progressFill').style.width = '100%';
+                        document.getElementById('progressText').textContent =
+                            `🚀 Cached Model Found! Loaded instantly. Accuracy: ${(data.accuracy * 100).toFixed(1)}%`;
+                        trainBtn.innerHTML = '<i class="fas fa-check"></i> Loaded from Storage';
+                        
+                        setTimeout(() => {
+                            window.location.href = '/test-trained-model';
+                        }, 2000);
+                        return;
+                    }
+
+                    const pollStatus = async () => {
+                        try {
+                            const statRes = await fetch(`/api/training-status/${data.training_id}`);
+                            const statData = await statRes.json();
+
+                            if (statData.status === 'completed') {
+                                document.getElementById('progressFill').style.width = '100%';
+
+                                if (taskMode === 'object_detection') {
+                                    document.getElementById('progressText').textContent =
+                                        `Training Complete! 100% | mAP: ${(statData.metrics.accuracy * 100).toFixed(1)}%`;
+                                    trainBtn.innerHTML = '<i class="fas fa-check"></i> Training Complete';
+                                    setTimeout(() => {
+                                        alert(`✅ YOLO Training Successful!\n\nFinal mAP: ${(statData.metrics.accuracy * 100).toFixed(1)}%\n\nYour detection model is ready!`);
+                                        window.location.href = '/result';
+                                    }, 1000);
+                                } else {
+                                    document.getElementById('progressText').textContent =
+                                        `Training Complete! 100% | Accuracy: ${(statData.metrics.accuracy * 100).toFixed(1)}%`;
+                                    trainBtn.innerHTML = '<i class="fas fa-check"></i> Training Complete';
+                                    setTimeout(() => {
+                                        alert(`✅ Training Successful!\n\nAccuracy: ${(statData.metrics.accuracy * 100).toFixed(1)}%\n\nYour model is ready for testing!`);
+                                        window.location.href = '/result';
+                                    }, 1000);
+                                }
+                            } else if (statData.status === 'failed') {
+                                throw new Error(statData.error || 'Training failed');
+                            } else {
+                                const prog = (statData.current_epoch / statData.total_epochs) * 100;
+                                document.getElementById('progressFill').style.width = `${prog}%`;
+
+                                if (taskMode === 'object_detection') {
+                                    document.getElementById('progressText').textContent =
+                                        `Epoch ${statData.current_epoch}/${statData.total_epochs} (${Math.round(prog)}%) - Box Loss: ${statData.metrics.loss?.toFixed(4) || '--'}`;
+                                } else {
+                                    document.getElementById('progressText').textContent =
+                                        `Epoch ${statData.current_epoch}/${statData.total_epochs} (${Math.round(prog)}%) - Accuracy: ${(statData.metrics.accuracy * 100).toFixed(1)}%`;
+                                }
+                                setTimeout(pollStatus, 1500); // Poll every 1.5s
+                            }
+                        } catch (err) {
+                            if (fakeProgressInterval) clearInterval(fakeProgressInterval);
+                            alert('Error updating progress: ' + err.message);
+                            trainBtn.innerHTML = '<i class="fas fa-play"></i> Start Training';
+                            trainBtn.disabled = false;
+                        }
+                    };
+
+                    // Only poll if it's the async detection model
+                    if (taskMode === 'object_detection') {
+                        pollStatus();
+                    } else {
+                        // For classification it's synchronous now so the response has the final results
+                        if (fakeProgressInterval) clearInterval(fakeProgressInterval);
+
+                        document.getElementById('progressFill').style.width = '100%';
+                        document.getElementById('progressText').textContent =
+                            `Training Complete! 100% | Accuracy: ${(data.accuracy * 100).toFixed(1)}%`;
+
+                        trainBtn.innerHTML = '<i class="fas fa-check"></i> Training Complete';
+
+                        setTimeout(() => {
+                            alert(`✅ Training Successful!\n\nAccuracy: ${(data.accuracy * 100).toFixed(1)}%\nValidation Accuracy: ${(data.val_accuracy * 100).toFixed(1)}%\nClasses: ${data.classes.join(', ')}\n\nYour model is ready for testing!`);
+                            window.location.href = '/result';
+                        }, 1000);
+                    }
+                } catch (error) {
+                    if (fakeProgressInterval) clearInterval(fakeProgressInterval);
+                    alert('Error: ' + error.message);
+                    document.getElementById('trainingProgress').classList.remove('show');
+                    trainBtn.innerHTML = '<i class="fas fa-play"></i> Start Training';
+                    trainBtn.disabled = false;
+                }
+            });
+        </script>
+</body>
+
+</html>

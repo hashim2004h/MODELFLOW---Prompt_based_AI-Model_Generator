@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Complete - AIForge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #00d97e;
+            --primary-rgb: 0, 217, 126;
+            --accent-cyan: #00ffa3;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --light-text: #e8eaed;
+            --secondary-text: #9aa0a6;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --pill-bg: rgba(255, 255, 255, 0.02);
+            --btn-hover: rgba(255, 255, 255, 0.03);
+            --progress-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --primary-green: #0066cc;
+            --primary-rgb: 0, 102, 204;
+            --accent-cyan: #00a2ff;
+            --dark-bg: #f5f7fa;
+            --darker-bg: #ffffff;
+            --card-bg: #ffffff;
+            --light-text: #1a1a1a;
+            --secondary-text: #5f6368;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --pill-bg: rgba(0, 0, 0, 0.02);
+            --btn-hover: rgba(0, 0, 0, 0.05);
+            --progress-bg: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--light-text);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(var(--primary-rgb), 0.03) 0%, transparent 55%),
+                radial-gradient(circle at 85% 30%, rgba(0, 179, 255, 0.03) 0%, transparent 55%);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .results-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .success-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.5rem;
+            background: rgba(var(--primary-rgb), 0.1);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            border-radius: 50px;
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .results-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .metric-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(var(--primary-rgb), 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.8rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--secondary-text);
+            font-size: 0.95rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: var(--dark-bg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 217, 126, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--light-text);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-green);
+            background: rgba(var(--primary-rgb), 0.1);
+        }
+
+        .training-summary {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .training-summary h3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+        }
+
+        .summary-label {
+            color: var(--secondary-text);
+        }
+
+        .summary-value {
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="results-container">
+        <div class="results-header">
+            <div class="success-badge">
+                <i class="fas fa-check-circle"></i>
+                Training Completed
+            </div>
+            <h1>Your Model is Ready! 🎉</h1>
+            <p style="color: var(--secondary-text); font-size: 1.1rem;">
+                Model trained successfully with excellent results
+            </p>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="metric-value">92.5%</div>
+                <div class="metric-label">Accuracy</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="metric-value">0.23</div>
+                <div class="metric-label">Loss</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-value">2m 15s</div>
+                <div class="metric-label">Training Time</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="metric-value">10</div>
+                <div class="metric-label">Epochs</div>
+            </div>
+        </div>
+
+        <!-- Training Summary -->
+        <div class="training-summary">
+            <h3>Training Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="summary-label">Model Type</span>
+                    <span class="summary-value">Custom CNN</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Classes</span>
+                    <span class="summary-value">3</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Training Images</span>
+                    <span class="summary-value">150</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Validation Split</span>
+                    <span class="summary-value">20%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/test-trained-model" class="btn btn-primary">
+                <i class="fas fa-vial"></i>
+                Test Model with New Data
+            </a>
+            <a href="/export" class="btn btn-primary">
+                <i class="fas fa-download"></i>
+                Export Model
+            </a>
+            <a href="/chat" class="btn btn-secondary">
+                <i class="fas fa-plus"></i>
+                Train New Model
+            </a>
+        </div>
+    </div>
+    <script>
+        // Initialize theme
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        });
+    </script>
+</body>
+
+</html>

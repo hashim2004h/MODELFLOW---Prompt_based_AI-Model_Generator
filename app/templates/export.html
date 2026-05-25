@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+
+{% block title %}Export Model - MODELFLOW{% endblock %}
+
+{% block content %}
+<style>
+        .export-container {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            color: var(--text-primary, #e8eaed);
+            font-family: 'Poppins', sans-serif;
+            transition: color 0.3s;
+        }
+
+        [data-theme="light"] .export-container { color: #1a1a1a; }
+        [data-theme="light"] .back-btn { color: #1a1a1a; background: rgba(0, 0, 0, 0.05); }
+        [data-theme="light"] .back-btn:hover { background: rgba(0, 102, 204, 0.1); color: #0066cc; }
+        [data-theme="light"] .export-header h1 { background: linear-gradient(90deg, #0066cc, #00a2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        [data-theme="light"] .export-header p { color: #5f6368; }
+        [data-theme="light"] .section-card { background: #ffffff; border-color: rgba(0, 0, 0, 0.1); }
+        [data-theme="light"] .section-card h2 { color: #1a1a1a; }
+        [data-theme="light"] .section-card h2::before { background: #0066cc; }
+        [data-theme="light"] .form-select { background: #f9f9f9; border-color: rgba(0, 0, 0, 0.1); color: #1a1a1a; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); }
+        [data-theme="light"] .form-select:focus { border-color: #0066cc; box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1); }
+        [data-theme="light"] .format-card { background: #ffffff; border-color: rgba(0, 0, 0, 0.1); }
+        [data-theme="light"] .format-card h3 { color: #1a1a1a; }
+        [data-theme="light"] .format-card p { color: #5f6368; }
+        [data-theme="light"] .format-card small { background: rgba(0, 0, 0, 0.05); color: #333; }
+        [data-theme="light"] .format-option input[type="checkbox"]:checked+.format-card { border-color: #0066cc; background: rgba(0, 102, 204, 0.05); }
+        [data-theme="light"] .format-option input[type="checkbox"]:checked+.format-card i { color: #0066cc; }
+        [data-theme="light"] .option-item { background: #ffffff; border-color: rgba(0, 0, 0, 0.1); }
+        [data-theme="light"] .option-item:hover { background: #f9f9f9; border-color: rgba(0, 0, 0, 0.15); }
+        [data-theme="light"] .option-item input { accent-color: #0066cc; }
+        [data-theme="light"] .option-item strong { color: #1a1a1a; }
+        [data-theme="light"] .option-item p { color: #5f6368; }
+        [data-theme="light"] .btn-gradient { background: linear-gradient(135deg, #0066cc 0%, #00a2ff 100%); color: #ffffff; }
+        [data-theme="light"] .btn-gradient:hover { box-shadow: 0 10px 20px rgba(0, 102, 204, 0.2); }
+        [data-theme="light"] .export-results { background: rgba(0, 102, 204, 0.05); border-color: rgba(0, 102, 204, 0.2); }
+        [data-theme="light"] .export-results h2 { color: #0066cc; }
+        [data-theme="light"] .result-item { background: #ffffff; border-color: rgba(0, 0, 0, 0.1); }
+        [data-theme="light"] .result-item strong { color: #1a1a1a; }
+        [data-theme="light"] .result-item small { color: #5f6368; }
+        [data-theme="light"] .btn-sm { background: #0066cc; color: #ffffff; }
+        [data-theme="light"] .btn-sm:hover { background: #005bb5; }
+
+    .export-header {
+        margin-bottom: 3rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .back-btn {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #e8eaed;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        transition: all 0.3s;
+    }
+
+    .back-btn:hover {
+        background: rgba(0, 217, 126, 0.1);
+        color: #00d97e;
+    }
+
+    .export-header h1 {
+        font-size: 2.8rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, #00d97e, #00ffa3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+    }
+
+    .export-header p {
+        color: #9aa0a6;
+        font-size: 1.1rem;
+    }
+
+    .section-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-card h2 {
+        margin-bottom: 1.5rem;
+        font-size: 1.4rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-card h2::before {
+        content: '';
+        display: block;
+        width: 4px;
+        height: 20px;
+        background: #00d97e;
+        border-radius: 2px;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: #1a1a1a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-radius: 12px;
+        font-size: 1rem;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1em;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #00d97e;
+        box-shadow: 0 0 0 2px rgba(0, 217, 126, 0.1);
+    }
+
+    .format-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .format-option {
+        display: block;
+    }
+
+    .format-option input[type="checkbox"] {
+        display: none;
+    }
+
+    .format-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 2px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .format-card i {
+        font-size: 2.5rem;
+        color: #9aa0a6;
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+    }
+
+    .format-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #fff;
+    }
+
+    .format-card p {
+        font-size: 0.9rem;
+        color: #9aa0a6;
+        margin-bottom: auto;
+    }
+
+    .format-card small {
+        display: block;
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        color: #666;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+    }
+
+    .format-option input[type="checkbox"]:checked+.format-card {
+        border-color: #00d97e;
+        background: rgba(0, 217, 126, 0.05);
+    }
+
+    .format-option input[type="checkbox"]:checked+.format-card i {
+        color: #00d97e;
+        transform: scale(1.1);
+    }
+
+    .options-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .option-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.2rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s;
+    }
+
+    .option-item:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .option-item input {
+        margin-top: 0.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        accent-color: #00d97e;
+    }
+
+    .option-item strong {
+        display: block;
+        color: #fff;
+        margin-bottom: 0.3rem;
+    }
+
+    .option-item p {
+        color: #9aa0a6;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #00d97e 0%, #00ffa3 100%);
+        color: #000;
+        border: none;
+        padding: 1.2rem 2.5rem;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        width: 100%;
+        margin-top: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 217, 126, 0.2);
+    }
+
+    .btn-gradient:active {
+        transform: translateY(0);
+    }
+
+    .btn-gradient:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .export-results {
+        margin-top: 3rem;
+        background: rgba(0, 217, 126, 0.05);
+        border: 1px solid rgba(0, 217, 126, 0.2);
+        border-radius: 16px;
+        padding: 2rem;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .export-results h2 {
+        color: #00d97e;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .result-item {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1.2rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .result-item.error-item {
+        border-left: 4px solid #ff4757;
+        background: rgba(255, 71, 87, 0.05);
+    }
+
+    .result-item i {
+        font-size: 1.5rem;
+    }
+
+    .result-item>div {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .result-item strong {
+        color: #fff;
+        font-size: 1.1rem;
+    }
+
+    .result-item small {
+        color: #9aa0a6;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    .btn-sm {
+        background: #00d97e;
+        color: #000;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-sm:hover {
+        background: #00ffa3;
+        transform: translateY(-1px);
+    }
+
+    /* Hide old deployment guide since it's empty */
+    .deployment-guide {
+        display: none;
+    }
+</style>
+<div class="export-container">
+    <div class="export-header">
+        <a href="{{ url_for('main.chat_page') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </a>
+        <h1>Export Your Model</h1>
+        <p>Download in multiple formats for any platform</p>
+    </div>
+
+    <div class="export-content">
+        <!-- Model Selection -->
+        <div class="section-card">
+            <h2>Select Model</h2>
+            <select id="exportModelSelect" class="form-select">
+                <option value="">-- Choose a trained model --</option>
+                {% for model in active_models %}
+                <option value="{{ model.id }}">{{ model.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Export Formats -->
+        <div class="section-card">
+            <h2>Choose Export Formats</h2>
+            <div class="format-grid">
+                <label class="format-option">
+                    <input type="checkbox" name="format" value="h5" checked>
+                    <div class="format-card">
+                        <i class="fas fa-file-code"></i>
+                        <h3>Keras H5</h3>
+                        <p>TensorFlow/Keras format</p>
+                        <small>Best for Python & TF Serving</small>
+                    </div>
+                </label>
+
+                <label class="format-option">
+                    <input type="checkbox" name="format" value="onnx" checked>
+                    <div class="format-card">
+                        <i class="fas fa-exchange-alt"></i>
+                        <h3>ONNX</h3>
+                        <p>Cross-platform format</p>
+                        <small>Multi-framework deployment</small>
+                    </div>
+                </label>
+
+                <label class="format-option">
+                    <input type="checkbox" name="format" value="tflite">
+                    <div class="format-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>TensorFlow Lite</h3>
+                        <p>Mobile & edge devices</p>
+                        <small>Android, iOS, embedded</small>
+                    </div>
+                </label>
+
+                <label class="format-option">
+                    <input type="checkbox" name="format" value="pt">
+                    <div class="format-card">
+                        <i class="fas fa-fire"></i>
+                        <h3>PyTorch</h3>
+                        <p>PyTorch format</p>
+                        <small>Research & deployment</small>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="section-card">
+            <h2>Export Options</h2>
+            <div class="options-list">
+                <label class="option-item">
+                    <input type="checkbox" id="quantize">
+                    <div>
+                        <strong>Quantize Model</strong>
+                        <p>Reduce model size for mobile deployment</p>
+                    </div>
+                </label>
+                <label class="option-item">
+                    <input type="checkbox" id="includeMetadata" checked>
+                    <div>
+                        <strong>Include Metadata</strong>
+                        <p>Add model information and class labels</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Export Button -->
+        <button id="exportBtn" class="btn-large btn-gradient">
+            <i class="fas fa-download"></i>
+            Export Models
+        </button>
+
+        <!-- Export Results -->
+        <div class="export-results" id="exportResults" style="display: none;">
+            <h2>✓ Export Complete</h2>
+            <div class="results-list" id="resultsList"></div>
+
+            <div class="deployment-guide">
+                <h3>Quick Start Guide</h3>
+                <div class="guide-tabs">
+                    <button class="guide-tab active" data-guide="python">Python</button>
+                    <button class="guide-tab" data-guide="onnx">ONNX</button>
+                    <button class="guide-tab" data-guide="tflite">TFLite</button>
+                </div>
+                <div class="guide-content">
+                    <pre><code id="guideCode"></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Export functionality
+    document.getElementById('exportBtn').addEventListener('click', async function () {
+        const modelId = document.getElementById('exportModelSelect').value;
+        if (!modelId) {
+            alert('Please select a model');
+            return;
+        }
+
+        const formats = Array.from(document.querySelectorAll('input[name="format"]:checked'))
+            .map(cb => cb.value);
+
+        if (formats.length === 0) {
+            alert('Please select at least one format');
+            return;
+        }
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+
+        try {
+            const results = await Promise.all(formats.map(format =>
+                fetch('/api/export-model', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model_id: modelId,
+                        format: format,
+                        options: {
+                            quantize: document.getElementById('quantize').checked,
+                            include_metadata: document.getElementById('includeMetadata').checked
+                        }
+                    })
+                }).then(r => r.json())
+            ));
+
+            displayResults(results);
+        } catch (error) {
+            alert('Export failed: ' + error.message);
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-download"></i> Export Models';
+        }
+    });
+
+    function displayResults(results) {
+        const resultsList = document.getElementById('resultsList');
+        resultsList.innerHTML = results.map(r => {
+            if (!r.success) {
+                return `
+                <div class="result-item error-item">
+                    <i class="fas fa-exclamation-circle" style="color: #ff4757;"></i>
+                    <div>
+                        <strong style="color: #ff4757;">Export Failed</strong>
+                        <small style="color: #ffb8b8;">${r.error || 'Unknown error occurred'}</small>
+                    </div>
+                </div>`;
+            }
+
+            return `
+            <div class="result-item">
+                <i class="fas fa-check-circle" style="color: var(--primary-green, #00d97e);"></i>
+                <div>
+                    <strong>${(r.format || 'Unknown').toUpperCase()}</strong>
+                    <small>${r.export_path || ''}</small>
+                </div>
+                <a href="${r.download_url}" class="btn-sm" download>
+                    <i class="fas fa-download"></i> Download
+                </a>
+            </div>`;
+        }).join('');
+
+        document.getElementById('exportResults').style.display = 'block';
+
+        // Scroll to results
+        setTimeout(() => {
+            document.getElementById('exportResults').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+</script>
+{% endblock %}

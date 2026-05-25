@@ -1,0 +1,58 @@
+﻿# Training Configuration
+# Default training parameters
+
+default_training:
+  epochs: 10
+  batch_size: 32
+  learning_rate: 0.001
+  validation_split: 0.2
+  early_stopping_patience: 5
+  reduce_lr_patience: 3
+  reduce_lr_factor: 0.5
+  min_learning_rate: 0.0000001
+  
+image_training:
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.001
+  augmentation: true
+  augmentation_level: "medium"  # light, medium, heavy
+  freeze_base: true
+  unfreeze_after_epoch: 10
+  
+text_training:
+  epochs: 3
+  batch_size: 16
+  learning_rate: 0.00002
+  max_length: 512
+  warmup_steps: 500
+  weight_decay: 0.01
+  
+tabular_training:
+  epochs: 100
+  batch_size: 64
+  learning_rate: 0.001
+  scaling_method: "standard"  # standard, minmax
+  
+transfer_learning:
+  initial_epochs: 10
+  fine_tune_epochs: 20
+  initial_learning_rate: 0.001
+  fine_tune_learning_rate: 0.0001
+  freeze_base_model: true
+  
+optimization:
+  optimizer: "adam"  # adam, sgd, rmsprop
+  loss: "categorical_crossentropy"
+  metrics: ["accuracy"]
+  
+callbacks:
+  tensorboard: true
+  model_checkpoint: true
+  early_stopping: true
+  reduce_lr_on_plateau: true
+  csv_logger: true
+  
+gpu_config:
+  allow_growth: true
+  memory_limit: null  # MB, null for no limit
