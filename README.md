@@ -1,32 +1,24 @@
 ﻿# MODELFLOW — Prompt-Based AI Model Generator
 
-![MODELFLOW Logo](app/static/images/logo.png)
+As part of my AI and software development learning journey, I developed MODELFLOW, a prompt-based platform designed to simplify machine learning model creation and deployment for beginners and non-technical users.
 
-## Overview
+The project focuses on automating AI workflows through natural language prompts, reducing the complexity involved in traditional machine learning development. :contentReference[oaicite:0]{index=0}
 
-MODELFLOW is a no-code/low-code web application that democratizes AI by allowing non-expert users to:
-- Describe AI tasks in plain English
-- Automatically get model architecture recommendations
-- Test models with sample data or webcam
-- Fine-tune on custom datasets
-- Export trained models in multiple formats (.h5, .pt, .onnx, .tflite)
+🔹 Prompt-based AI model generation  
+🔹 Automated model recommendation system  
+🔹 Real-time model training and testing  
+🔹 Support for image, audio, and pose-based AI projects  
+🔹 Multi-format model export (H5, ONNX, TFLite, PyTorch)  
+🔹 Interactive browser-based workflow automation  
 
-## Features
+Key highlights from the project:
 
-✅ **Natural Language Interface** - Describe your AI task in plain English  
-✅ **Automatic Model Recommendation** - AI suggests the best architecture  
-✅ **Real-time Testing** - Test with webcam or upload files  
-✅ **Transfer Learning** - Fine-tune pretrained models on your data  
-✅ **Multi-format Export** - Export to H5, PyTorch, ONNX, TFLite  
-✅ **AutoML Integration** - Automated hyperparameter tuning  
+• Simplified end-to-end machine learning workflow  
+• Reduced manual coding effort for AI development  
+• Real-time dataset collection and model testing  
+• Supports deployment-ready model export formats  
+• Integrated OCR, object detection, and speech-to-text modules  
 
-## Quick Start
+Tech Stack: Python, Flask, TensorFlow, Keras, OpenCV, HTML, CSS, JavaScript, OpenRouter API  
 
-### Prerequisites
-- Python 3.10 or higher
-- 8GB RAM minimum (16GB recommended)
-- GPU optional but recommended for training
-
-### Installation
-
-1. Clone the repository:
+Developed with a strong focus on workflow automation, accessibility, real-time AI interaction, and simplifying complex machine learning processes through an interactive web-based platform.
