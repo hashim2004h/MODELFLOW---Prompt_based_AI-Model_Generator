@@ -29,7 +29,6 @@ A prompt-based AI platform designed to simplify machine learning workflow creati
 - Python  
 - Flask  
 - TensorFlow  
-- OpenCV  
 - HTML, CSS, JavaScript  
 
 ---
